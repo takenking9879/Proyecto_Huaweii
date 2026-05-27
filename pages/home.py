@@ -5,49 +5,59 @@ dash.register_page(__name__, path='/')
 
 SECTIONS = [
     {
-        'key': 'exploratorio', 'icon': '◈', 'label': 'EXPLORATORIO',
-        'num': '01 – 04', 'tagline': 'Tendencias · Geografía · Categorías · Comparativo',
+        'key': 'diagnostico', 'icon': '◈', 'label': 'DIAGNÓSTICO',
+        'num': '01 – 03', 'tagline': 'El territorio: ¿qué está pasando y dónde?',
         'color': '#00b4cc', 'glow': 'rgba(0,180,204,0.22)',
         'bg': 'rgba(0,180,204,0.04)', 'border': 'rgba(0,180,204,0.25)',
         'slides': [
-            {'num': 1, 'label': 'Tendencias',  'title': 'Evolución anual',
-             'desc': 'Incidencia por entidad federativa · 2015–2024', 'href': '/slide_1'},
-            {'num': 2, 'label': 'Geografía',   'title': 'Distribución estatal',
-             'desc': 'Ranking de estados y municipios más afectados', 'href': '/slide_2'},
-            {'num': 3, 'label': 'Categorías',  'title': 'Bienes jurídicos',
-             'desc': 'Composición del crimen por tipo de delito', 'href': '/slide_3'},
-            {'num': 4, 'label': 'Comparativo', 'title': 'Análisis temporal',
-             'desc': 'Heatmap mensual, víctimas por sexo y variación', 'href': '/slide_4'},
+            {'num': 1, 'label': 'Tendencias',
+             'title': 'Evolución anual de incidencia',
+             'desc': 'Tendencias 2015–2024 · estacionalidad · heatmap mensual · top estados',
+             'href': '/slide_1'},
+            {'num': 2, 'label': 'Geografía',
+             'title': 'Distribución estatal',
+             'desc': 'Ranking de estados y municipios con mayor incidencia delictiva',
+             'href': '/slide_2'},
+            {'num': 3, 'label': 'Categorías',
+             'title': 'Fraude como señal digital',
+             'desc': 'Composición por tipo de delito · fraude lidera correlación con digitalización',
+             'href': '/slide_3'},
         ],
     },
     {
-        'key': 'profundo', 'icon': '◎', 'label': 'PROFUNDO',
-        'num': '05 – 07 · 11', 'tagline': 'Economía · Digitalización · Percepción · Infra × Seguridad',
+        'key': 'evidencia', 'icon': '◎', 'label': 'EVIDENCIA',
+        'num': '04 – 06', 'tagline': 'Por qué la infraestructura digital importa',
         'color': '#c9922a', 'glow': 'rgba(201,146,42,0.22)',
         'bg': 'rgba(201,146,42,0.04)', 'border': 'rgba(201,146,42,0.25)',
         'slides': [
-            {'num': 5,  'label': 'Crimen × PIB',  'title': 'Economía y crimen',
-             'desc': 'Correlación delito-crecimiento por estado', 'href': '/slide_5'},
-            {'num': 6,  'label': 'Crimen × IDDE', 'title': 'Desarrollo digital',
-             'desc': 'Digitalización vs tasas de criminalidad estatal', 'href': '/slide_6'},
-            {'num': 7,  'label': 'ENVIPE',         'title': 'Percepción seguridad',
-             'desc': 'Confianza institucional y gasto en protección', 'href': '/slide_7'},
-            {'num': 11, 'label': 'Infra × Seg',    'title': 'Infra Digital × Seguridad',
-             'desc': 'Correlaciones · Panel 2022-25 · K-Means k=4 · 134 variables', 'href': '/slide_11'},
+            {'num': 4, 'label': 'Percepción',
+             'title': 'Infraestructura → percepción ciudadana',
+             'desc': 'R²=0.445 IDDE → seguridad percibida · confianza social r=+0.78 · ENVIPE 32 estados',
+             'href': '/slide_7'},
+            {'num': 5, 'label': 'Economía',
+             'title': 'Digitalización → salarios y empleo',
+             'desc': 'R²=0.594 banca digital → salarios · lag 2 años · +$790/mes inversión sostenida',
+             'href': '/slide_economia'},
+            {'num': 6, 'label': 'Ciberseguridad',
+             'title': 'Fraude: la brecha más urgente',
+             'desc': 'Fraude r=+0.63 con IDDE · 8 estados en brecha crítica · oportunidad de mercado',
+             'href': '/slide_ciberseguridad'},
         ],
     },
     {
-        'key': 'modelos', 'icon': '⬡', 'label': 'MODELOS',
-        'num': '08 – 10', 'tagline': 'ENOE · DENUE · Innovación Digital',
+        'key': 'estrategia', 'icon': '⬡', 'label': 'ESTRATEGIA',
+        'num': '07 – 08', 'tagline': 'Dónde y cómo invertir por perfil de estado',
         'color': '#00b87a', 'glow': 'rgba(0,184,122,0.22)',
         'bg': 'rgba(0,184,122,0.04)', 'border': 'rgba(0,184,122,0.25)',
         'slides': [
-            {'num': 8,  'label': 'ENOE · Modelo',   'title': 'Mercado laboral',
-             'desc': 'Predicción salarial con Random Forest y XGBoost', 'href': '/slide_8'},
-            {'num': 9,  'label': 'DENUE · Modelo',  'title': 'Densidad empresarial',
-             'desc': 'Clasificación de estados · SHAP · Curvas ROC', 'href': '/slide_9'},
-            {'num': 10, 'label': 'Análisis Modelo', 'title': 'Innovación vs Crimen',
-             'desc': 'R²=0.77 · Clustering K-Means · PCA · Simulador', 'href': '/slide_10'},
+            {'num': 7, 'label': 'Oportunidad',
+             'title': '4 perfiles de inversión · ROI proyectado',
+             'desc': 'K-Means k=4 · ROI por cluster · +10 pts IDDE proyecta retornos medibles en salarios',
+             'href': '/slide_inversion'},
+            {'num': 8, 'label': 'Tu Estado',
+             'title': 'Diagnóstico ejecutivo por estado',
+             'desc': 'Selecciona tu estado: cluster, IDDE, brecha y retorno proyectado de inversión digital',
+             'href': '/slide_perfil_estado'},
         ],
     },
 ]
@@ -102,7 +112,8 @@ def _slide_card(s, color, border):
 def _section_panel(s):
     color  = s['color']
     border = s['border']
-    grid_cls = 'sec-slides-grid' if len(s['slides']) == 4 else 'sec-slides-grid grid-3'
+    n_slides = len(s['slides'])
+    grid_cls = 'sec-slides-grid' if n_slides == 4 else 'sec-slides-grid grid-3'
     return html.Div([
         html.Div([
             html.Div([
@@ -139,18 +150,19 @@ layout = html.Div(
             className='intro-content',
             children=[
                 html.Div(
-                    className='intro-hero-text animate-in',
+                    className='intro-hero-text animate-pop',
                     children=[
-                        html.P('Panel de Seguridad Pública · México',
+                        html.P('Diagnóstico de Inversión · México 2025',
                                className='intro-eyebrow'),
                         html.H1(
-                            ['Datos que revelan', html.Br(),
-                             'el panorama de seguridad'],
+                            ['Infraestructura Digital', html.Br(),
+                             'como Motor de Desarrollo'],
                             className='intro-titulo',
                         ),
                         html.P(
-                            'Transformamos datos oficiales de seguridad en conocimiento '
-                            'claro y accionable para apoyar decisiones basadas en evidencia.',
+                            'La evidencia muestra que la brecha digital es la mayor '
+                            'oportunidad de inversión en México — con retornos medibles '
+                            'en salarios, percepción ciudadana y ciberseguridad.',
                             className='intro-subtitulo',
                         ),
                     ],

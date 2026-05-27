@@ -1,7 +1,7 @@
 import dash
 from dash import dcc, html, Input, Output
 import dash_bootstrap_components as dbc
-from pages.get_figures.get_figures_3 import fig_donut_bienes, fig_treemap_subtipos, fig_tendencia_bienes
+from pages.get_figures.get_figures_3 import fig_donut_bienes, fig_treemap_subtipos
 from pages.get_data.get_data_3 import get_entidades, get_anios
 from pages.components import sidebar
 
@@ -39,10 +39,10 @@ layout = html.Div([
         # ── Page header ──────────────────────────────────────────
         html.Div([
             html.Div(className='page-accent-line'),
-            html.H1('Clasificación por Bien Jurídico Afectado', className='page-title'),
+            html.H1('Tipología de Incidencia · Composición por Bien Jurídico', className='page-title'),
             html.P(
-                'El crimen según lo que protege la ley — composición y evolución de '
-                '7 categorías jurídicas: Patrimonio, Vida, Sociedad, Libertad, Familia, Sexual y Estado',
+                'Estructura del problema público — 7 categorías jurídicas que revelan qué tipo de '
+                'inversión en capacidades digitales genera mayor retorno preventivo · 2015–2024',
                 className='page-subtitle',
             ),
             html.Div([
@@ -64,20 +64,18 @@ layout = html.Div([
                 className='page-context',
             ),
 
-            # Insight cards
+            # Insight cards — two dominant categories, two structural patterns
             dbc.Row([
-                dbc.Col(_ins('◈', 'card-danger', 'Patrimonio domina',
-                    'Los delitos patrimoniales (robo, fraude, extorsión) representan '
-                    'consistentemente más del 50 % del total de la incidencia nacional.', 'animate-in-delay-1'), md=3),
-                dbc.Col(_ins('◎', 'card-gold', 'Sociedad en alza',
-                    'El crimen de tipo Sociedad (narcomenudeo, trata) aumenta como porcentaje '
-                    'del total — reflejo del avance del crimen organizado a nivel local.', 'animate-in-delay-2'), md=3),
-                dbc.Col(_ins('⬡', 'card-cyan', 'Vida: menos volumen, alto impacto',
-                    'Homicidio y lesiones representan menos del 10 % del total, '
-                    'pero tienen el mayor impacto en percepción de inseguridad ciudadana.', 'animate-in-delay-3'), md=3),
-                dbc.Col(_ins('⌬', 'card-success', 'Composición estable',
-                    'La distribución porcentual entre categorías varía menos del 5 % '
-                    'año a año — el patrón estructural del crimen es relativamente estable.', 'animate-in-delay-4'), md=3),
+                dbc.Col(_ins('◈', 'card-danger', 'Patrimonio domina con más del 50 %',
+                    'Robo, fraude y extorsión representan la mayoría de los delitos. '
+                    'El fraude es el subtipo más correlacionado con la brecha digital '
+                    '— la digitalización crea nuevas superficies de ataque.',
+                    'animate-in-delay-1'), md=6),
+                dbc.Col(_ins('◎', 'card-gold', 'Sociedad y Vida: volumen vs impacto',
+                    'Narcomenudeo y trata crecen como proporción del total. '
+                    'Homicidio pesa menos del 10 % pero domina la percepción ciudadana. '
+                    'La composición es estable: varía menos del 5 % año a año.',
+                    'animate-in-delay-2'), md=6),
             ], className='g-3 mb-3'),
 
             # Filter bar
@@ -123,17 +121,6 @@ layout = html.Div([
                 ),
             ], className='g-3 mb-3'),
 
-            # Tendencia bienes
-            dbc.Row([
-                dbc.Col(
-                    _card('Composición del crimen a lo largo del tiempo',
-                          dcc.Graph(id='s3-graph-tendencia', figure=fig_tendencia_bienes(),
-                                    config=_CFG, style={'height': '300px'}),
-                          desc='Área apilada: el total de todas las franjas es el crimen nacional. El grosor de cada franja muestra cuánto aporta esa categoría por año.'),
-                    md=12,
-                ),
-            ], className='g-3 mb-3'),
-
         ], className='main-scroll'),
 
     ], className='section-exploratorio', style={'flex': '1', 'display': 'flex', 'flexDirection': 'column', 'overflow': 'hidden'}),
@@ -144,7 +131,6 @@ layout = html.Div([
 @dash.callback(
     Output('s3-graph-donut',     'figure'),
     Output('s3-graph-treemap',   'figure'),
-    Output('s3-graph-tendencia', 'figure'),
     Input('s3-dd-estado', 'value'),
     Input('s3-dd-inicio', 'value'),
     Input('s3-dd-fin',    'value'),
@@ -153,5 +139,4 @@ def actualizar(estado, inicio, fin):
     return (
         fig_donut_bienes(estado, inicio, fin),
         fig_treemap_subtipos(estado, inicio, fin),
-        fig_tendencia_bienes(estado),
     )

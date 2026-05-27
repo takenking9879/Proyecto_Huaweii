@@ -7,13 +7,23 @@ from pages.components import sidebar
 from pages.get_figures.get_figures_11 import (
     fig_crime_type_corrs, fig_corr_heatmap, fig_6_scatters,
     fig_clustering_scatter, fig_cluster_profiles,
-    fig_panel_scatter, fig_velocity_vs_coverage,
 )
+from pages.get_figures.get_figures_6 import fig_scatter_idde
 from pages.get_data.get_data_11 import get_data_11
 
 dash.register_page(__name__, path='/slide_11')
 
 _CHART_H = '340px'
+
+_IDDE_ANIOS = [2022, 2023, 2024]
+_IDDE_TASAS = [
+    ('tasa_Sociedad',   'Tasa Sociedad'),
+    ('tasa_Patrimonio', 'Tasa Patrimonio'),
+    ('tasa_Vida',       'Tasa Vida'),
+    ('tasa_Familia',    'Tasa Familia'),
+    ('tasa_Sexual',     'Tasa Sexual'),
+    ('tasa_x100k',      'Tasa Total'),
+]
 
 _INSIGHTS = [
     {
@@ -31,14 +41,6 @@ _INSIGHTS = [
                 'es la confianza entre amigos y familia. Pero el efecto se invierte en instituciones: '
                 'mayor bancarización digital → menor confianza en jueces y Ministerio Público (r hasta −0.50). '
                 'El acceso digital expone las fallas del Estado más de lo que las resuelve.',
-    },
-    {
-        'icon': '⬡', 'color': 'card-danger',
-        'title': 'Panel 2022–2025 — r ≈ 0, sin causalidad',
-        'desc': 'Comparando cada estado consigo mismo en el tiempo, la correlación IDDE → crimen cae a r = +0.14. '
-                'La fuerte correlación transversal (r ~ 0.5–0.6) es espuria: '
-                'estados más desarrollados simplemente reportan más delitos. '
-                'Digitalizar no aumenta ni reduce el crimen — el panel lo descarta.',
     },
     {
         'icon': '⌬', 'color': 'card-gold',
@@ -59,9 +61,9 @@ _CLUSTER_CALLOUTS = {
         'La paradoja se explica por subregistro: baja digitalización = menos canales de denuncia '
         '= menos crimen anotado en los registros, no menos crimen real. '
         'Guerrero y Chiapas concentran presencia fuerte del crimen organizado que no llega a las estadísticas oficiales. '
-        'Para Huawei: mayor oportunidad de infraestructura básica (conectividad, fibra, cobertura móvil), '
-        'pero también el mayor desafío institucional. La banda ancha aquí no solo conecta — '
-        'también hace visible lo que antes era invisible.',
+        'Mayor oportunidad de infraestructura básica (conectividad, fibra, cobertura móvil): '
+        'la banda ancha aquí no solo conecta — también hace visible lo que antes era invisible '
+        'y habilita servicios públicos digitales que hoy no existen.',
     ),
     'C1': (
         '¿Por qué C1 es el caso más complejo?',
@@ -153,10 +155,10 @@ layout = html.Div([
         # ── Page header ───────────────────────────────────────────────
         html.Div([
             html.Div(className='page-accent-line'),
-            html.H1('Infraestructura Digital × Seguridad', className='page-title'),
+            html.H1('Infraestructura Digital × Bienestar · Perfiles de Inversión', className='page-title'),
             html.P(
-                'Análisis transversal 32 estados · 134 variables · IDDE 2025 + ENVIPE + ENOE + Incidencia delictiva · '
-                'Correlaciones · Panel 2022–2025 · K-Means k=4',
+                'El IDDE predice salarios (r²=0.54), confianza social (r=0.78) y densidad económica — '
+                '32 estados · 134 variables · K-Means k=4 revela 4 perfiles con necesidades y retornos distintos',
                 className='page-subtitle',
             ),
             html.Div([
@@ -178,14 +180,11 @@ layout = html.Div([
         html.Div([
 
             html.P(
-                '32 estados · 134 variables · corte transversal 2025 + panel 2022–2025. '
+                '32 estados · 134 variables · corte transversal 2025. '
                 'Se cruzan ~28 variables de infraestructura digital del IDDE '
                 '(conectividad, velocidad, economía digital, capital humano, pilares) '
                 'con tasas de crimen por tipo de delito, percepción de seguridad, '
-                'confianza institucional y social (ENVIPE) y salarios (ENOE). '
-                'Pregunta central: ¿la digitalización cambia los patrones de seguridad? '
-                '¿La correlación que vemos es causal o espuria? ¿Qué perfiles de estados emergen '
-                'y qué implica cada uno para una propuesta de valor diferenciada?',
+                'confianza institucional y social (ENVIPE) y salarios (ENOE).',
                 className='page-context',
             ),
 
@@ -193,16 +192,13 @@ layout = html.Div([
             dbc.Row([
                 dbc.Col(_insight_card(
                     _INSIGHTS[0]['icon'], _INSIGHTS[0]['color'],
-                    _INSIGHTS[0]['title'], _INSIGHTS[0]['desc'], 'animate-in-delay-1'), md=3),
+                    _INSIGHTS[0]['title'], _INSIGHTS[0]['desc'], 'animate-in-delay-1'), md=4),
                 dbc.Col(_insight_card(
                     _INSIGHTS[1]['icon'], _INSIGHTS[1]['color'],
-                    _INSIGHTS[1]['title'], _INSIGHTS[1]['desc'], 'animate-in-delay-2'), md=3),
+                    _INSIGHTS[1]['title'], _INSIGHTS[1]['desc'], 'animate-in-delay-2'), md=4),
                 dbc.Col(_insight_card(
                     _INSIGHTS[2]['icon'], _INSIGHTS[2]['color'],
-                    _INSIGHTS[2]['title'], _INSIGHTS[2]['desc'], 'animate-in-delay-3'), md=3),
-                dbc.Col(_insight_card(
-                    _INSIGHTS[3]['icon'], _INSIGHTS[3]['color'],
-                    _INSIGHTS[3]['title'], _INSIGHTS[3]['desc'], 'animate-in-delay-4'), md=3),
+                    _INSIGHTS[2]['title'], _INSIGHTS[2]['desc'], 'animate-in-delay-3'), md=4),
             ], className='g-3 mb-3'),
 
             # ── Crime type correlations ───────────────────────────────
@@ -309,15 +305,58 @@ layout = html.Div([
             ], className='card-clean mb-3',
                style={'borderLeft': '3px solid #4fc3f744'}),
 
+            # ── IDDE scatter por grupo (merged from slide_6) ───────────────
+            html.Div([
+                html.Div(className='section-accent-cyan'),
+                html.H3('IDDE vs crimen — por grupo de digitalización',
+                        className='section-block-title'),
+                html.P(
+                    'Cada punto es un estado, coloreado por su grupo IDDE (Básico → Líder). '
+                    'Selecciona el año y la categoría de crimen en el eje Y para explorar distintas relaciones.',
+                    className='section-block-subtitle'),
+            ], className='section-block-header'),
+
+            html.Div([
+                html.Span('Año', className='filter-label'),
+                dcc.Dropdown(
+                    id='s11-dd-anio',
+                    options=[{'label': str(a), 'value': a} for a in _IDDE_ANIOS],
+                    value=2024, clearable=False,
+                    className='dropdown-hw', style={'width': '120px'},
+                ),
+                html.Span('Crimen (eje Y)', className='filter-label'),
+                dcc.Dropdown(
+                    id='s11-dd-tasa',
+                    options=[{'label': l, 'value': v} for v, l in _IDDE_TASAS],
+                    value='tasa_Sociedad', clearable=False,
+                    className='dropdown-hw', style={'width': '200px'},
+                ),
+            ], className='filter-bar mb-3'),
+
+            dbc.Row([
+                dbc.Col(
+                    dbc.Card([
+                        dbc.CardBody(
+                            dcc.Loading(dcc.Graph(
+                                id='s11-scatter-idde',
+                                config={'displayModeBar': False, 'responsive': True},
+                                style={'height': '380px'},
+                            )),
+                            style={'padding': '8px'},
+                        ),
+                    ], className='card-clean card-pop animate-in card-expandable'),
+                    md=12,
+                ),
+            ], className='g-3 mb-3'),
             # ── 6 scatter plots ───────────────────────────────────────
             html.Div([
                 html.Div(className='section-accent-cyan'),
-                html.H3('6 relaciones clave — zoom en los vínculos más reveladores',
+                html.H3('3 relaciones clave — zoom en los vínculos más reveladores',
                         className='section-block-title'),
                 html.P(
                     'Cada panel muestra una relación bivariada con su coeficiente r. '
-                    'Línea punteada = regresión lineal. '
-                    'El panel inferior derecho usa datos de panel 2022–2025 (cambios dentro del estado).',
+                    'Línea punteada = regresión lineal. El panel completo de cambios 2022→2025 '
+                    'se presenta en la sección de análisis de panel más abajo.',
                     className='section-block-subtitle'),
             ], className='section-block-header'),
 
@@ -388,55 +427,6 @@ layout = html.Div([
 
             # Cluster cards
             html.Div(id='s11-cluster-cards', className='mb-4'),
-
-            # ── Panel + velocity ──────────────────────────────────────
-            html.Div([
-                html.Div(className='section-accent-cyan'),
-                html.H3('Análisis de panel 2022→2025 — ¿existe causalidad?',
-                        className='section-block-title'),
-                html.P(
-                    'Se calculan los cambios dentro de cada estado (ΔIDDE, ΔCrimen) para controlar '
-                    'las diferencias estructurales entre entidades. Si la digitalización causara '
-                    'reducción del crimen, esperaríamos r negativo. El resultado: r ≈ 0.',
-                    className='section-block-subtitle'),
-            ], className='section-block-header'),
-
-            dbc.Row([
-                dbc.Col(
-                    dbc.Card([
-                        html.P('ΔDigitalización vs ΔCrimen (dentro del mismo estado)',
-                               className='chart-label'),
-                        html.P('r≈0 indica que subir el IDDE no redujo el crimen en el corto plazo.',
-                               className='chart-desc'),
-                        dbc.CardBody(
-                            dcc.Loading(dcc.Graph(
-                                id='s11-panel',
-                                config={'displayModeBar': False, 'responsive': True},
-                                style={'height': _CHART_H},
-                            )),
-                            style={'padding': '8px'},
-                        ),
-                    ], className='card-clean card-pop animate-in card-expandable h-100'),
-                    md=6,
-                ),
-                dbc.Col(
-                    dbc.Card([
-                        html.P('Cobertura vs Velocidad — ¿cuál predice más?',
-                               className='chart-label'),
-                        html.P('R² al predecir salarios, crimen y homicidios con cobertura sola, velocidad sola, o ambas.',
-                               className='chart-desc'),
-                        dbc.CardBody(
-                            dcc.Loading(dcc.Graph(
-                                id='s11-vel-cob',
-                                config={'displayModeBar': False, 'responsive': True},
-                                style={'height': _CHART_H},
-                            )),
-                            style={'padding': '8px'},
-                        ),
-                    ], className='card-clean animate-in card-expandable h-100'),
-                    md=6,
-                ),
-            ], className='g-3 mb-4'),
 
             # Limitations box
             dbc.Card([
@@ -532,8 +522,6 @@ def _build_cluster_cards_safe():
     Output('s11-6scatters',      'figure'),
     Output('s11-cluster-scatter','figure'),
     Output('s11-cluster-profiles','figure'),
-    Output('s11-panel',          'figure'),
-    Output('s11-vel-cob',        'figure'),
     Output('s11-cluster-cards',  'children'),
     Output('s11-loaded',         'data'),
     Input('s11-init', 'n_intervals'),
@@ -545,8 +533,15 @@ def load_all(_):
         _safe(fig_6_scatters),
         _safe(fig_clustering_scatter),
         _safe(fig_cluster_profiles),
-        _safe(fig_panel_scatter),
-        _safe(fig_velocity_vs_coverage),
         _build_cluster_cards_safe(),
         1,
     )
+
+
+@dash.callback(
+    Output('s11-scatter-idde', 'figure'),
+    Input('s11-dd-anio',       'value'),
+    Input('s11-dd-tasa',       'value'),
+)
+def update_idde_scatter(anio, tasa):
+    return fig_scatter_idde(anio or 2024, tasa or 'tasa_Sociedad')

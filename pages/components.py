@@ -1,38 +1,34 @@
 from dash import html, dcc
 
 _SECTION_ITEMS = {
-    'exploratorio': [
+    'diagnostico': [
         ('01  Tendencias',  '/slide_1'),
         ('02  Geografía',   '/slide_2'),
         ('03  Categorías',  '/slide_3'),
-        ('04  Comparativo', '/slide_4'),
     ],
-    'profundo': [
-        ('05  Crimen × PIB',        '/slide_5'),
-        ('06  Crimen × IDDE',       '/slide_6'),
-        ('07  ENVIPE',              '/slide_7'),
-        ('11  Infra Digital × Seg', '/slide_11'),
+    'evidencia': [
+        ('04  Percepción',       '/slide_7'),
+        ('05  Economía Digital', '/slide_economia'),
+        ('06  Ciberseguridad',   '/slide_ciberseguridad'),
     ],
-    'modelos': [
-        ('08  ENOE · Modelo',     '/slide_8'),
-        ('09  DENUE · Modelo',    '/slide_9'),
-        ('10  Innovación Digital', '/slide_10'),
+    'estrategia': [
+        ('07  Oportunidad',      '/slide_inversion'),
+        ('08  Tu Estado',        '/slide_perfil_estado'),
     ],
 }
 
 _SECTION_META = {
-    'exploratorio': {'label': 'EXPLORATORIO', 'core': '#00b4cc', 'bright': '#33d4ee'},
-    'profundo':     {'label': 'PROFUNDO',      'core': '#c9922a', 'bright': '#f0b84a'},
-    'modelos':      {'label': 'MODELOS',       'core': '#00b87a', 'bright': '#00d98f'},
+    'diagnostico': {'label': 'DIAGNÓSTICO', 'core': '#00b4cc', 'bright': '#33d4ee'},
+    'evidencia':   {'label': 'EVIDENCIA',   'core': '#c9922a', 'bright': '#f0b84a'},
+    'estrategia':  {'label': 'ESTRATEGIA',  'core': '#00b87a', 'bright': '#00d98f'},
 }
 
 _PATH_TO_SECTION = {
-    '/slide_1': 'exploratorio', '/slide_2': 'exploratorio',
-    '/slide_3': 'exploratorio', '/slide_4': 'exploratorio',
-    '/slide_5': 'profundo',     '/slide_6': 'profundo',
-    '/slide_7': 'profundo',     '/slide_11': 'profundo',
-    '/slide_8': 'modelos',      '/slide_9': 'modelos',
-    '/slide_10': 'modelos',
+    '/slide_1': 'diagnostico', '/slide_2': 'diagnostico',
+    '/slide_3': 'diagnostico',
+    '/slide_7': 'evidencia',      '/slide_economia': 'evidencia',
+    '/slide_ciberseguridad': 'evidencia',
+    '/slide_inversion': 'estrategia', '/slide_perfil_estado': 'estrategia',
 }
 
 

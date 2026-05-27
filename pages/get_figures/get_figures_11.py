@@ -19,8 +19,8 @@ C_PAPER  = '#1a1a24'
 C_PLOT   = '#111118'
 C_TEXT   = '#e8e8f0'
 C_MUTED  = '#5c5c74'
-C_BLUE   = '#3498db'
-C_ORANGE = '#f39c12'
+C_BLUE   = '#3891c7'
+C_ORANGE = '#e4982e'
 
 _BASE = dict(
     paper_bgcolor=C_PAPER, plot_bgcolor=C_PLOT,
@@ -225,47 +225,32 @@ def fig_corr_heatmap():
 def fig_6_scatters():
     d       = get_data_11()
     cross   = d['cross']
-    changes = d['changes_df']
 
     _PAIRS = [
         (_IDDE_COL, 'fraude_rate_100k',
-         'IDDE 2025', 'Fraudes /100k hab',    C_GREEN, 'IDDE × Fraudes (r≈+0.63)'),
-        (_IDDE_COL, 'homicidio_rate_100k',
-         'IDDE 2025', 'Homicidios /100k hab',  C_RED,   'IDDE × Homicidios (r≈+0.03)'),
+         'IDDE 2025', 'Fraudes /100k hab',    C_GREEN, 'IDDE × Fraudes'),
         ('cobertura_de_banda_ancha_fija_por', 'conf_amigos',
          'Cobertura BB fija (%)', 'Conf. Amigos',    C_CYAN,  'Cobertura × Confianza social'),
-        ('penetracion_de_tarjeta_de_debito_x100adu', 'conf_mp',
-         'Tarjeta Débito /100', 'Conf. Min. Público', C_GOLD, 'Tarjeta × Conf. MP (paradoja)'),
         ('velocidad_de_descarga_de_banda_ancha_movil_mbps', 'avg_wage',
          'Vel. BB móvil (Mbps)', 'Salario prom. ($)', C_BLUE, 'Velocidad × Salarios'),
-        (None, None,
-         'ΔIDDE (2022→25)', 'ΔCrimen /100k hab', '#9b59b6', 'Panel: ΔIDDE × ΔCrimen'),
     ]
 
     titles = [p[5] for p in _PAIRS]
-    fig = make_subplots(rows=2, cols=3, subplot_titles=titles,
-                        horizontal_spacing=0.09, vertical_spacing=0.16)
+    fig = make_subplots(rows=1, cols=3, subplot_titles=titles,
+                        horizontal_spacing=0.10, vertical_spacing=0.12)
 
     for idx, (xc, yc, xl, yl, color, _) in enumerate(_PAIRS):
-        r = idx // 3 + 1
-        c = idx % 3 + 1
+        r = 1
+        c = idx + 1
 
-        if xc is None:
-            if changes.empty:
-                continue
-            xs    = changes['didde'].tolist()
-            ys    = changes['dcrime'].tolist()
-            texts = [_abbrev(s) for s in changes['estado'].tolist()]
-            r_val = float(changes['didde'].corr(changes['dcrime']))
-        else:
-            cols_need = [xc, yc] + (['estado'] if 'estado' in cross.columns else [])
-            sub = cross[cols_need].dropna()
-            if len(sub) < 5:
-                continue
-            xs    = sub[xc].tolist()
-            ys    = sub[yc].tolist()
-            texts = [_abbrev(s) for s in sub['estado'].tolist()] if 'estado' in sub.columns else [''] * len(xs)
-            r_val = float(sub[xc].corr(sub[yc]))
+        cols_need = [xc, yc] + (['estado'] if 'estado' in cross.columns else [])
+        sub = cross[cols_need].dropna()
+        if len(sub) < 5:
+            continue
+        xs    = sub[xc].tolist()
+        ys    = sub[yc].tolist()
+        texts = [_abbrev(s) for s in sub['estado'].tolist()] if 'estado' in sub.columns else [''] * len(xs)
+        r_val = float(sub[xc].corr(sub[yc]))
 
         fig.add_trace(go.Scatter(
             x=xs, y=ys, mode='markers', text=texts,
@@ -275,7 +260,6 @@ def fig_6_scatters():
             showlegend=False,
         ), row=r, col=c)
 
-        # Regression line
         x_arr = np.array(xs, dtype=float)
         y_arr = np.array(ys, dtype=float)
         if len(x_arr) > 2 and np.std(x_arr) > 0:
@@ -288,31 +272,30 @@ def fig_6_scatters():
                 showlegend=False, hoverinfo='skip',
             ), row=r, col=c)
 
-        # r annotation
         fig.add_annotation(
             row=r, col=c,
             x=0.96, y=0.06, xref='x domain', yref='y domain',
             text=f'r={r_val:.2f}',
-            font=dict(size=9.5, color=color),
+            font=dict(size=10, color=color),
             showarrow=False, xanchor='right',
         )
 
     fig.update_layout(
         **{**_BASE, 'margin': dict(l=10, r=10, t=52, b=10)},
-        height=480,
+        height=340,
         title=dict(
-            text='6 relaciones clave — Infraestructura digital × Seguridad en México',
+            text='3 relaciones clave — Infraestructura digital × Seguridad en México',
             font=dict(size=12, color=C_TEXT), x=0.5,
         ),
         showlegend=False,
     )
-    for i in range(1, 7):
+    for i in range(1, 4):
         suf = '' if i == 1 else str(i)
         fig.update_layout(**{
             f'xaxis{suf}': dict(showgrid=True, gridcolor='rgba(255,255,255,0.04)',
-                                zeroline=False, color=C_MUTED, tickfont=dict(size=7.5)),
+                                zeroline=False, color=C_MUTED, tickfont=dict(size=8)),
             f'yaxis{suf}': dict(showgrid=True, gridcolor='rgba(255,255,255,0.04)',
-                                zeroline=False, color=C_MUTED, tickfont=dict(size=7.5)),
+                                zeroline=False, color=C_MUTED, tickfont=dict(size=8)),
         })
     return fig
 

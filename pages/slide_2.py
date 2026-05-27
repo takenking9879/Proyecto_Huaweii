@@ -1,7 +1,7 @@
 import dash
 from dash import dcc, html, Input, Output
 import dash_bootstrap_components as dbc
-from pages.get_figures.get_figures_2 import fig_ranking_estados, fig_top_municipios, fig_evolucion_estados
+from pages.get_figures.get_figures_2 import fig_ranking_estados, fig_top_municipios
 from pages.get_data.get_data_2 import get_anios
 from pages.components import sidebar
 
@@ -38,10 +38,10 @@ layout = html.Div([
         # ── Page header ──────────────────────────────────────────
         html.Div([
             html.Div(className='page-accent-line'),
-            html.H1('Distribución Geográfica del Crimen', className='page-title'),
+            html.H1('Distribución Geográfica · Brechas de Desarrollo', className='page-title'),
             html.P(
-                'Dónde se concentra el crimen — ranking de 32 estados, municipios más '
-                'afectados y cómo cambió la geografía del delito entre 2015 y 2024',
+                'Concentración regional del rezago — ranking de 32 estados y municipios: '
+                'dónde la inversión en infraestructura digital tiene mayor impacto potencial · 2015–2024',
                 className='page-subtitle',
             ),
             html.Div([
@@ -98,28 +98,21 @@ layout = html.Div([
                 ),
             ], className='filter-bar'),
 
-            # Three charts in a row
+            # Two charts in a row
             dbc.Row([
                 dbc.Col(
                     _card('Ranking de 32 estados',
                           dcc.Graph(id='s2-graph-ranking', figure=fig_ranking_estados(),
                                     config=_CFG, style={'height': '420px'}),
                           desc='Ordenados de menor a mayor incidencia. El color más intenso identifica al estado con mayor concentración de delitos en el año seleccionado.'),
-                    md=4,
+                    md=6,
                 ),
                 dbc.Col(
                     _card('Municipios con mayor incidencia',
                           dcc.Graph(id='s2-graph-municipios', figure=fig_top_municipios(),
                                     config=_CFG, style={'height': '420px'}),
                           desc='Los municipios con más delitos del año seleccionado. La mayoría son zonas metropolitanas — el crimen se concentra en alta densidad urbana.'),
-                    md=4,
-                ),
-                dbc.Col(
-                    _card('Evolución histórica — top 5 estados',
-                          dcc.Graph(id='s2-graph-evolucion', figure=fig_evolucion_estados(),
-                                    config=_CFG, style={'height': '420px'}),
-                          desc='Las líneas muestran si el crimen en los 5 estados más afectados sube, baja o se estabiliza a lo largo del período 2015–2024.'),
-                    md=4,
+                    md=6,
                 ),
             ], className='g-3 mb-3'),
 

@@ -2,6 +2,7 @@ import dash
 from dash import dcc, html, Input, Output
 import dash_bootstrap_components as dbc
 from pages.get_figures.get_figures_1 import fig_tendencia, fig_estacionalidad, fig_top_estados_lineas
+from pages.get_figures.get_figures_4 import fig_heatmap
 from pages.get_data.get_data_1 import get_entidades, get_anios, get_kpis
 from pages.components import sidebar
 
@@ -40,10 +41,10 @@ layout = html.Div([
         # ── Page header ──────────────────────────────────────────
         html.Div([
             html.Div(className='page-accent-line'),
-            html.H1('Tendencias de Crimen en México', className='page-title'),
+            html.H1('Tendencias de Incidencia · Diagnóstico Base', className='page-title'),
             html.P(
-                '10 años de datos del SESNSP — tendencia anual, estacionalidad mensual '
-                'y comparativo de los estados más afectados · 2015–2024',
+                '10 años de datos oficiales SESNSP — tendencia anual, estacionalidad mensual '
+                'y comparativo entre estados. Diagnóstico base para identificar rezagos y oportunidades · 2015–2024',
                 className='page-subtitle',
             ),
             html.Div([
@@ -67,20 +68,19 @@ layout = html.Div([
                 className='page-context',
             ),
 
-            # Insight cards
+            # Insight cards — primary insight first, then supporting
             dbc.Row([
-                dbc.Col(_ins('◈', 'card-danger', 'Patrimonio lidera',
+                dbc.Col(_ins('◈', 'card-danger', 'Patrimonio lidera la incidencia nacional',
                     'Los delitos contra el patrimonio (robo, fraude) representan más del 50 % '
-                    'del total de la incidencia delictiva nacional.', 'animate-in-delay-1'), md=3),
+                    'del total de la incidencia delictiva nacional — y el fraude es el subtipo '
+                    'que más crece con la digitalización.', 'animate-in-delay-1'), md=4),
                 dbc.Col(_ins('◎', 'card-gold', 'Pico histórico 2018',
                     f'La incidencia alcanzó su máximo en {kpis_ini["anio_pico"]} con '
-                    f'{kpis_ini["total"]:,.0f} delitos; desde entonces la tendencia es mixta.', 'animate-in-delay-2'), md=3),
-                dbc.Col(_ins('⬡', 'card-cyan', 'Estacionalidad marcada',
-                    'Julio y agosto registran consistentemente la mayor incidencia mensual '
-                    'a nivel nacional; diciembre muestra el nivel más bajo del año.', 'animate-in-delay-3'), md=3),
-                dbc.Col(_ins('⌬', 'card-success', 'Top 5 estados',
-                    'Estado de México, CDMX, Jalisco, Guanajuato y Veracruz concentran '
-                    'históricamente más del 40 % de todos los delitos registrados.', 'animate-in-delay-4'), md=3),
+                    f'{kpis_ini["total"]:,.0f} delitos; desde entonces la tendencia es mixta.', 'animate-in-delay-2'), md=4),
+                dbc.Col(_ins('⬡', 'card-cyan', 'Estacionalidad y geografía',
+                    'Julio y agosto concentran la mayor incidencia. Cinco estados acumulan '
+                    'más del 40 % de todos los delitos — la criminalidad tiene ritmo y lugar.',
+                    'animate-in-delay-3'), md=4),
             ], className='g-3 mb-3'),
 
             # Filter bar
@@ -137,6 +137,17 @@ layout = html.Div([
                 ),
             ], className='g-3 mb-3'),
 
+            # Heatmap mes × año
+            dbc.Row([
+                dbc.Col(
+                    _card('Intensidad del crimen: mes × año',
+                          dcc.Graph(id='s1-graph-heatmap', figure=fig_heatmap(),
+                                    config=_CFG, style={'height': '360px'}),
+                          desc='Más rojo = más delitos. Lee por filas (mismo mes en distintos años) para ver si el patrón estacional se mantiene, o por columnas para ver tendencia anual.'),
+                    md=12,
+                ),
+            ], className='g-3 mb-3'),
+
         ], className='main-scroll'),
 
     ], className='section-exploratorio', style={'flex': '1', 'display': 'flex', 'flexDirection': 'column', 'overflow': 'hidden'}),
@@ -147,9 +158,10 @@ layout = html.Div([
 @dash.callback(
     Output('s1-graph-tendencia',      'figure'),
     Output('s1-graph-estacionalidad', 'figure'),
+    Output('s1-graph-heatmap',        'figure'),
     Input('s1-dd-estado', 'value'),
     Input('s1-dd-inicio', 'value'),
     Input('s1-dd-fin',    'value'),
 )
 def actualizar(estado, inicio, fin):
-    return fig_tendencia(estado, inicio, fin), fig_estacionalidad(estado, inicio, fin)
+    return fig_tendencia(estado, inicio, fin), fig_estacionalidad(estado, inicio, fin), fig_heatmap(estado)

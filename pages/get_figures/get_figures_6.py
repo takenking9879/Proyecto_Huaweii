@@ -95,8 +95,10 @@ def fig_pilares_por_grupo(anio=2022):
 
 def fig_crimen_por_grupo(anio=2022):
     df = get_crimen_por_grupo(anio)
+    df_raw = get_df(anio)
     tasa_cols = [c for c in df.columns if c.startswith('tasa_') and c != 'tasa_x100k']
     labels = [c.replace('tasa_', '') for c in tasa_cols]
+    national_median = float(df_raw['tasa_x100k'].median())
 
     fig = go.Figure()
     for grupo in GRUPO_ORDER:
@@ -109,6 +111,15 @@ def fig_crimen_por_grupo(anio=2022):
             marker_color=GRUPO_COLORS[grupo], opacity=0.85,
             hovertemplate=f'<b>{grupo}</b><br>%{{x}}: %{{y:.1f}}/100k<extra></extra>',
         ))
+    fig.add_hline(
+        y=national_median,
+        line_dash='dot',
+        line_color='#9090a8',
+        line_width=1.5,
+        annotation_text=f'Mediana nacional: {national_median:,.0f}',
+        annotation_font_color='#9090a8',
+        annotation_font_size=10,
+    )
     fig.update_layout(
         **_BASE,
         barmode='group',

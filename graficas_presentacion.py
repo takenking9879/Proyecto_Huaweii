@@ -4,7 +4,7 @@ Crimen, Desarrollo Digital y Crecimiento Economico en Mexico — Panel 2015-2024
 Ejecutar desde el directorio que contiene HuaweiProject.db
 """
 
-import sqlite3, warnings
+import warnings
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -52,7 +52,11 @@ GRUPO_COLORS_RAW = {
     "Líder":       "#2ca02c",
 }
 GRUPO_ORDER = ["Básico", "Emprendedor", "Avanzado", "Líder"]
-DB_PATH = "HuaweiProject.db"
+
+# Use DuckDB with parquet files (same as the dashboard)
+from pages.db import query as db_query
+import os
+_DB_DIR = os.path.join(os.path.dirname(__file__), 'db').replace('\\', '/')
 
 # ══════════════════════════════════════════════════════════════════════════════
 # A. PIPELINE DE DATOS
@@ -142,50 +146,49 @@ def _add_crime_rates(df):
 
 
 def build_dataframes():
-    with sqlite3.connect(DB_PATH) as conn:
-        # ── DF1: crimen 2015-2022 ─────────────────────────────────────────
-        raw1 = pd.read_sql("""
-            SELECT f.anio, e.estado, s.subtipo, SUM(f.incidencia_delictiva) AS total
-            FROM incidencia_estatal f
-            JOIN dim_estado         e ON f.clave_ent  = e.clave_ent
-            JOIN dim_subtipo_delito s ON f.subtipo_id = s.subtipo_id
-            WHERE f.anio BETWEEN 2015 AND 2022
-            GROUP BY f.anio, e.estado, s.subtipo
-        """, conn)
+    # ── DF1: crimen 2015-2022 ─────────────────────────────────────────
+    raw1 = db_query("""
+        SELECT f.anio, e.estado, s.subtipo, SUM(f.incidencia_delictiva) AS total
+        FROM incidencia_estatal f
+        JOIN dim_estado         e ON f.clave_ent  = e.clave_ent
+        JOIN dim_subtipo_delito s ON f.subtipo_id = s.subtipo_id
+        WHERE f.anio BETWEEN 2015 AND 2022
+        GROUP BY f.anio, e.estado, s.subtipo
+    """)
 
-        # ── DF2: crimen + IDDE 2022-2024 ─────────────────────────────────
-        crime224 = pd.read_sql("""
-            SELECT f.anio, e.clave_ent, e.estado, s.subtipo,
-                   SUM(f.incidencia_delictiva) AS total
-            FROM incidencia_estatal f
-            JOIN dim_estado         e ON f.clave_ent  = e.clave_ent
-            JOIN dim_subtipo_delito s ON f.subtipo_id = s.subtipo_id
-            WHERE f.anio IN (2022, 2023, 2024)
-            GROUP BY f.anio, e.clave_ent, e.estado, s.subtipo
-        """, conn)
+    # ── DF2: crimen + IDDE 2022-2024 ─────────────────────────────────
+    crime224 = db_query("""
+        SELECT f.anio, e.clave_ent, e.estado, s.subtipo,
+               SUM(f.incidencia_delictiva) AS total
+        FROM incidencia_estatal f
+        JOIN dim_estado         e ON f.clave_ent  = e.clave_ent
+        JOIN dim_subtipo_delito s ON f.subtipo_id = s.subtipo_id
+        WHERE f.anio IN (2022, 2023, 2024)
+        GROUP BY f.anio, e.clave_ent, e.estado, s.subtipo
+    """)
 
-        idde_frames = []
-        for yr, tbl, gcol in [
-            (2022, "idde_2022", "grupo_de_digitalizacion_id"),
-            (2023, "idde_2023", "grupo_de_digitalizacion_2023_id"),
-            (2024, "idde_2024", "grupo_de_digitalizacion_2024_id"),
-        ]:
-            q = f"""
-                SELECT clave_inegi_de_estado AS clave_ent,
-                       indice_de_desarrollo_digital_estatal_{yr} AS idde_score,
-                       pilar_infraestructura,
-                       pilar_digitalizacion_de_las_personas_y_la_sociedad AS pilar_sociedad,
-                       pilar_innovacion_y_adopcion_tecnologica_de_las_empresas AS pilar_innovacion,
-                       usuarios_de_internet_por, habilidades_de_programacion_por,
-                       solicitudes_de_patentes_xmhab, graduados_en_programas_stem_xmhab,
-                       policia_cibernetica_xmhab, {gcol} AS grupo_id
-                FROM {tbl}
-            """
-            d = pd.read_sql(q, conn)
-            d["anio"] = yr
-            idde_frames.append(d)
+    idde_frames = []
+    for yr, tbl, gcol in [
+        (2022, "idde_2022", "grupo_de_digitalizacion_id"),
+        (2023, "idde_2023", "grupo_de_digitalizacion_2023_id"),
+        (2024, "idde_2024", "grupo_de_digitalizacion_2024_id"),
+    ]:
+        q = f"""
+            SELECT clave_inegi_de_estado AS clave_ent,
+                   indice_de_desarrollo_digital_estatal_{yr} AS idde_score,
+                   pilar_infraestructura,
+                   pilar_digitalizacion_de_las_personas_y_la_sociedad AS pilar_sociedad,
+                   pilar_innovacion_y_adopcion_tecnologica_de_las_empresas AS pilar_innovacion,
+                   usuarios_de_internet_por, habilidades_de_programacion_por,
+                   solicitudes_de_patentes_xmhab, graduados_en_programas_stem_xmhab,
+                   policia_cibernetica_xmhab, {gcol} AS grupo_id
+            FROM {tbl}
+        """
+        d = db_query(q)
+        d["anio"] = yr
+        idde_frames.append(d)
 
-        grupos = pd.read_sql("SELECT * FROM dim_grupo_digitalizacion", conn)
+    grupos = db_query("SELECT * FROM dim_grupo_digitalizacion")
 
     # ── Procesar DF1 ──────────────────────────────────────────────────────
     raw1["categoria"] = raw1["subtipo"].map(BIEN_MAP).fillna("Otros")

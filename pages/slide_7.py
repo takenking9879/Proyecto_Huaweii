@@ -1,24 +1,31 @@
 import dash
-from dash import dcc, html
+from dash import dcc, html, Input, Output, callback
 import dash_bootstrap_components as dbc
 from pages.components import sidebar
 from pages.get_figures.get_figures_7 import (
-    fig_percepcion_inseguridad, fig_confianza_institucional, fig_gastos_por_estrato,
+    fig_idde_vs_percepcion,
+    fig_percepcion_inseguridad,
+    fig_infra_vs_trust,
 )
 from pages.get_data.get_data_7 import get_kpis
+from pages.get_data.get_data_1 import get_entidades
 
 dash.register_page(__name__, path='/slide_7')
 
-kpis = get_kpis()
+kpis      = get_kpis()
+entidades = get_entidades()
 
 _CFG = {'displayModeBar': False, 'responsive': True}
 
 
-def _card(title, body, desc=None):
+def _chart_card(title, graph_id, desc=None, height='380px'):
     children = [html.P(title, className='chart-label')]
     if desc:
         children.append(html.P(desc, className='chart-desc'))
-    children.append(dbc.CardBody(body, style={'padding': '6px 8px 10px'}))
+    children.append(dbc.CardBody(
+        dcc.Graph(id=graph_id, config=_CFG, style={'height': height}),
+        style={'padding': '6px 8px 10px'},
+    ))
     return dbc.Card(children, className='card-clean card-pop animate-in h-100 card-expandable')
 
 
@@ -37,87 +44,143 @@ layout = html.Div([
 
     html.Div([
 
-        # ── Page header ──────────────────────────────────────────
         html.Div([
             html.Div(className='page-accent-line'),
-            html.H1('Percepción de Seguridad · ENVIPE', className='page-title'),
+            html.H1('Percepción e Infraestructura · Brecha de Confianza', className='page-title'),
             html.P(
-                'La percepción de inseguridad no siempre coincide con la incidencia real — '
-                'ENVIPE: inseguridad percibida por estado, confianza en instituciones y gasto en protección',
+                'La infraestructura digital explica el 44% de la varianza en percepción de seguridad '
+                '(R²=0.445) — los ciudadanos en estados más digitalizados se sienten más seguros, '
+                'independientemente de la tasa de crimen real',
                 className='page-subtitle',
             ),
             html.Div([
-                html.Span(f'{kpis["pct_inseguro_nac"]:.1f}% se sienten inseguros',
-                          className='badge-red me-2'),
-                html.Span(f'Más inseguro: {kpis["estado_mas_inseguro"][:14]}',
-                          className='badge-gold me-2'),
-                html.Span(f'Mayor confianza: {kpis["institucion_mas_confianza"]}',
-                          className='badge-cyan'),
+                html.Span(f'R² = 0.445 IDDE → percepción', className='badge-cyan me-2'),
+                html.Span(f'{kpis["pct_inseguro_nac"]:.1f}% se sienten inseguros', className='badge-red me-2'),
+                html.Span(f'Confianza social r = +0.78', className='badge-gold'),
             ]),
         ], className='page-header'),
 
-        # ── Scrollable body ──────────────────────────────────────
         html.Div([
 
-            # Context
             html.P(
-                'La Encuesta Nacional de Victimización y Percepción sobre Seguridad Pública '
-                '(ENVIPE) mide percepción de inseguridad — que no siempre coincide con la '
-                'incidencia real registrada. Sentirse inseguro tiene costos económicos concretos: '
-                'los hogares invierten en rejas, alarmas y guardias privados. Esta sección '
-                'compara la percepción por estado, la confianza en instituciones, y el gasto en '
-                'protección según el nivel socioeconómico del hogar.',
+                'ENVIPE mide percepción de inseguridad y confianza institucional por estado. '
+                'Al cruzarlos con el IDDE 2025 emerge una relación robusta: '
+                'la infraestructura digital cierra la brecha entre realidad y percepción ciudadana. '
+                'Selecciona un estado para ver sus datos específicos.',
                 className='page-context',
             ),
 
-            # Insight cards
             dbc.Row([
-                dbc.Col(_ins('◈', 'card-danger', f'{kpis["pct_inseguro_nac"]:.1f}% — 7 de cada 10',
+                dbc.Col(_ins('◈', 'card-cyan', 'R² = 0.445 — relación más fuerte',
+                    'La infraestructura digital explica el 44% de por qué los ciudadanos '
+                    'se sienten seguros o inseguros — independientemente del crimen real. '
+                    'Es el vínculo más sólido entre inversión y percepción ciudadana.',
+                    'animate-in-delay-1'), md=3),
+                dbc.Col(_ins('◎', 'card-danger', f'{kpis["pct_inseguro_nac"]:.1f}% — 7 de cada 10',
                     f'Más de 7 de cada 10 mexicanos se siente inseguro. '
-                    f'{kpis["estado_mas_inseguro"]} encabeza la lista de mayor percepción '
-                    f'de inseguridad a nivel estatal.', 'animate-in-delay-1'), md=3),
-                dbc.Col(_ins('◎', 'card-gold', 'Ejército lidera confianza',
-                    f'El {kpis["institucion_mas_confianza"]} es la institución con mayor '
-                    f'confianza positiva según ENVIPE. La Policía Municipal ocupa los últimos lugares.', 'animate-in-delay-2'), md=3),
-                dbc.Col(_ins('⬡', 'card-cyan', 'Brecha por estrato',
-                    'Los estratos socioeconómicos más bajos destinan un mayor porcentaje '
-                    'de su ingreso a gastos de protección ante el crimen — carga regresiva.', 'animate-in-delay-3'), md=3),
-                dbc.Col(_ins('⌬', 'card-success', 'Percepción ≠ Incidencia',
-                    'Algunos estados con alta percepción de inseguridad no figuran en el '
-                    'top de incidencia real — la percepción tiene dinámicas propias.', 'animate-in-delay-4'), md=3),
+                    f'{kpis["estado_mas_inseguro"][:16]} encabeza la percepción de inseguridad. '
+                    'La percepción es el problema operativo — la infraestructura es la solución.',
+                    'animate-in-delay-2'), md=3),
+                dbc.Col(_ins('⌬', 'card-gold', 'El mecanismo: lazos sociales primero',
+                    'La infraestructura digital actúa INDIRECTAMENTE: '
+                    'fortalece la confianza entre ciudadanos (r=+0.75) y esa confianza '
+                    'es lo que genera percepción de seguridad (r=+0.42). '
+                    'La vía directa infraestructura→seguridad es estadísticamente débil sin este puente.',
+                    'animate-in-delay-3'), md=3),
+                dbc.Col(_ins('⬡', 'card-success', 'Percepción ≠ incidencia real',
+                    'Algunos estados con alta percepción de inseguridad no encabezan '
+                    'la incidencia real. La brecha se cierra con mejor infraestructura '
+                    'de comunicación y gobierno digital.',
+                    'animate-in-delay-4'), md=3),
             ], className='g-3 mb-3'),
 
-            # Percepción por estado (full width)
+            # State selector
+            html.Div([
+                html.Span('Estado', className='filter-label'),
+                dcc.Dropdown(
+                    id='s7-dd-estado',
+                    options=[{'label': 'Nacional', 'value': 'Nacional'}] +
+                            [{'label': e, 'value': e} for e in entidades],
+                    value='Nacional', clearable=False,
+                    className='dropdown-hw', style={'width': '280px'},
+                ),
+            ], className='filter-bar mb-3'),
+
+            # MAIN: IDDE vs percepcion (full width)
+            html.Div([
+                html.Div(className='section-accent-cyan'),
+                html.H3('Infraestructura digital → percepción de seguridad (R² = 0.445)',
+                        className='section-block-title'),
+                html.P(
+                    'Cada punto es un estado. Los estados sobre la línea de tendencia '
+                    'obtienen más percepción de seguridad de lo que su IDDE predice (verde). '
+                    'Los que están por debajo están sub-rindiendo — su potencial de mejora es mayor (rojo).',
+                    className='section-block-subtitle'),
+            ], className='section-block-header'),
+
             dbc.Row([
                 dbc.Col(
-                    _card('Percepción de inseguridad por estado (%)',
-                          dcc.Graph(figure=fig_percepcion_inseguridad(),
-                                    config=_CFG, style={'height': '380px'}),
-                          desc='% de la población que se siente insegura según ENVIPE (INEGI). Puede diferir de la incidencia real — la percepción tiene dinámicas propias.'),
+                    _chart_card(
+                        'IDDE 2025 vs % que se siente seguro',
+                        's7-graph-percepcion-gap',
+                        desc='R²=0.445: la infraestructura digital explica el 44% de la varianza en percepción de seguridad.',
+                        height='400px',
+                    ),
                     md=12,
                 ),
             ], className='g-3 mb-3'),
 
-            # Confianza + Gastos
+            # Second row: perception bar + trust scatter
+            html.Div([
+                html.Div(className='section-accent-cyan'),
+                html.H3('Percepción e infraestructura — detalle estatal',
+                        className='section-block-title'),
+                html.P(
+                    'Izquierda: % de ciudadanos que se sienten inseguros por estado. '
+                    'Derecha: IDDE vs confianza en amigos (r=+0.78) — '
+                    'los estados más digitalizados reportan mayor confianza social.',
+                    className='section-block-subtitle'),
+            ], className='section-block-header'),
+
             dbc.Row([
                 dbc.Col(
-                    _card('Confianza en instituciones (% positiva)',
-                          dcc.Graph(figure=fig_confianza_institucional(),
-                                    config=_CFG, style={'height': '320px'}),
-                          desc='% con evaluación positiva por institución (ENVIPE). La Policía Municipal recibe sistemáticamente las evaluaciones más bajas del país.'),
+                    _chart_card(
+                        'Percepción de inseguridad por estado (%)',
+                        's7-graph-percepcion',
+                        desc='% de la población que se siente insegura. Selecciona un estado para destacarlo.',
+                        height='600px',
+                    ),
                     md=6,
                 ),
                 dbc.Col(
-                    _card('Gastos en protección vs crimen por estrato socioeconómico',
-                          dcc.Graph(figure=fig_gastos_por_estrato(),
-                                    config=_CFG, style={'height': '320px'}),
-                          desc='Gasto promedio en rejas, alarmas y vigilancia privada por decil de ingreso. Los estratos más bajos gastan mayor % de su ingreso en protección.'),
+                    _chart_card(
+                        'Infraestructura digital vs confianza social (r = +0.78)',
+                        's7-graph-infra-trust',
+                        desc='Cada punto = un estado. r=+0.78: la correlación más fuerte del análisis entre IDDE y bienestar social.',
+                        height='440px',
+                    ),
                     md=6,
                 ),
-            ], className='g-3 mb-3'),
+            ], className='g-3 mb-4'),
 
         ], className='main-scroll'),
 
-    ], className='section-profundo', style={'flex': '1', 'display': 'flex', 'flexDirection': 'column', 'overflow': 'hidden'}),
+    ], className='section-profundo',
+       style={'flex': '1', 'display': 'flex', 'flexDirection': 'column', 'overflow': 'hidden'}),
 
 ], style={'height': '100vh', 'width': '100vw', 'display': 'flex'})
+
+
+@callback(
+    Output('s7-graph-percepcion-gap', 'figure'),
+    Output('s7-graph-percepcion',     'figure'),
+    Output('s7-graph-infra-trust',    'figure'),
+    Input('s7-dd-estado', 'value'),
+)
+def update_charts(estado):
+    highlight = estado if estado and estado != 'Nacional' else None
+    return (
+        fig_idde_vs_percepcion(highlight),
+        fig_percepcion_inseguridad(highlight),
+        fig_infra_vs_trust(highlight),
+    )

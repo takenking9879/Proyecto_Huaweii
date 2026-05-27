@@ -1,6 +1,9 @@
 # Claude Code
 .claude/
 
+# Command Code
+.commandcode/
+
 # Python
 __pycache__/
 *.pyc

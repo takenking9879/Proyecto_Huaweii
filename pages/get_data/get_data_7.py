@@ -4,6 +4,7 @@ from pages.db import query
 
 _cache_main  = None
 _cache_confi = None
+_cache_infra_trust = None
 
 
 def _load():
@@ -104,6 +105,37 @@ def get_confianza_institucional():
     return _confianza_institucional()
 
 
+def get_confianza_institucional_por_estado(estado=None):
+    """Returns confidence in institutions filtered to one state, or national if None."""
+    df = _load()
+    conf_cols = {
+        'conf_army':    'Ejército',
+        'conf_fed_pol': 'Pol. Federal',
+        'conf_sta_pol': 'Pol. Estatal',
+        'conf_judges':  'Jueces',
+        'conf_transit': 'Tránsito',
+        'conf_mp':      'Ministerio P.',
+    }
+    conf_map = query("SELECT nivel_confianza_id, nivel_confianza FROM dim_nivel_confianza")
+    rows = []
+    for col, label in conf_cols.items():
+        merged = df[[col, 'estado', 'homes']].copy()
+        merged = merged.merge(
+            conf_map.rename(columns={'nivel_confianza_id': col, 'nivel_confianza': 'nivel'}),
+            on=col, how='left'
+        )
+        if estado and estado != 'Nacional':
+            merged = merged[merged['estado'] == estado]
+        tot = merged['homes'].sum()
+        if tot == 0:
+            rows.append({'institucion': label, 'pct_confianza': 0.0})
+            continue
+        pct_positiva = (merged[merged['nivel'].isin(['Mucha Confianza', 'Algo de Confianza'])]['homes'].sum()
+                        / tot * 100)
+        rows.append({'institucion': label, 'pct_confianza': round(float(pct_positiva), 1)})
+    return pd.DataFrame(rows).sort_values('pct_confianza', ascending=True)
+
+
 def get_gastos_por_estrato():
     df = _load()
     gastos_map = query("SELECT gastos_id, gastos_rango FROM dim_gastos_proteccion")
@@ -128,3 +160,47 @@ def get_kpis():
         'estado_mas_seguro': mas_seguro,
         'institucion_mas_confianza': inst_mas_confianza,
     }
+
+
+def get_idde_vs_percepcion():
+    """EXP-09: IDDE 2025 vs % who feel safe per state — R²≈0.445."""
+    from pages.get_data.get_data_11 import get_data_11
+    d = get_data_11()
+    cross = d['cross_cl']
+    idde_col = 'indice_de_desarrollo_digital_estatal_2025'
+    cols = ['estado', idde_col, 'percepcion_segura']
+    return cross[[c for c in cols if c in cross.columns]].dropna().copy()
+
+
+def get_infra_vs_trust():
+    global _cache_infra_trust
+    if _cache_infra_trust is not None:
+        return _cache_infra_trust
+
+    # ENVIPE state-level trust scores
+    conf_auth_map = query("SELECT nivel_confianza_id AS id, nivel_confianza AS lbl FROM dim_nivel_confianza")
+    conf_auth_num = {'Mucha Confianza': 4, 'Algo de Confianza': 3, 'Algo de Desconfianza': 2, 'Mucha Desconfianza': 1}
+    conf_auth_dict = {r['id']: conf_auth_num.get(r['lbl']) for _, r in conf_auth_map.iterrows()}
+
+    conf_pers_map = query("SELECT nivel_confianza_personal_id AS id, nivel_confianza_personal AS lbl FROM dim_nivel_confianza_personal")
+    conf_pers_num = {'Mucha': 4, 'Alguna': 3, 'Poca': 2, 'Nada': 1}
+    conf_pers_dict = {r['id']: conf_pers_num.get(r['lbl']) for _, r in conf_pers_map.iterrows()}
+
+    envipe_raw = query("SELECT * FROM datamexico_envipe")
+    dim_estado = query("SELECT clave_ent, estado FROM dim_estado")
+    envipe_raw = envipe_raw.merge(dim_estado, left_on='state_id', right_on='clave_ent', how='left')
+
+    envipe_raw['conf_amigos'] = envipe_raw['trust_in_friends_id'].map(conf_pers_dict)
+    envipe_raw['conf_familia'] = envipe_raw['trust_in_family_id'].map(conf_pers_dict)
+
+    envipe_state = envipe_raw.groupby('estado')[['conf_amigos', 'conf_familia']].mean().reset_index()
+
+    # IDDE 2024
+    idde = query("SELECT clave_inegi_de_estado AS clave_ent, "
+                 "indice_de_desarrollo_digital_estatal_2024 AS idde_score "
+                 "FROM idde_2024")
+    idde = idde.merge(dim_estado, on='clave_ent')
+
+    merged = idde.merge(envipe_state, on='estado')
+    _cache_infra_trust = merged
+    return merged

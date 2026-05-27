@@ -135,8 +135,9 @@ _CRIME_TYPES = {
     'secuestro':          'Secuestro',
 }
 
-# Cluster colour scheme (matches notebook: 0=red, 1=blue, 2=green, 3=orange)
-CLUSTER_COLORS = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12']
+# Cluster colour scheme — color-blind safe with distinct lightness steps
+# C0 (warm coral L≈22%), C1 (steel blue L≈25%), C2 (emerald L≈35%), C3 (amber L≈39%)
+CLUSTER_COLORS = ['#d15b4a', '#3891c7', '#2bb573', '#e4982e']
 
 
 # ── Build dataset ─────────────────────────────────────────────────────────────
@@ -376,19 +377,19 @@ def _build():
         all_idd  = sorted([v['idde']       for v in stats.values()])
         all_hom  = sorted([v['homicidio']  for v in stats.values()])
         if idd <= all_idd[0] * 1.05:        # lowest IDDE
-            return ('C0', 'Tradicionales',       '#e74c3c',
+            return ('C0', 'Tradicionales',       '#d15b4a',
                 'Menor IDDE del país. Crimen reportado bajo por subregistro. Baja cobertura y conectividad. '
                 'Potencial para infraestructura básica de Huawei.')
         elif hom >= all_hom[-1] * 0.85:    # highest homicidios
-            return ('C3', 'Violentos-conectados', '#f39c12',
+            return ('C3', 'Violentos-conectados', '#e4982e',
                 'Buena infraestructura digital pero crisis de homicidios (4× el promedio nacional). '
                 'La tecnología sin institucionalidad no resuelve la violencia. Necesitan seguridad inteligente, no más fibra.')
         elif prc >= max(v['percepcion'] for v in stats.values()) * 0.85:  # highest perception
-            return ('C2', 'Desarrollados-seguros', '#2ecc71',
+            return ('C2', 'Desarrollados-seguros', '#2bb573',
                 'Mejor IDDE + alta percepción de seguridad + bajos homicidios. '
                 'El modelo aspiracional: digitalización y seguridad coexisten. Referencia para política pública.')
         else:                               # residual = CDMX/EdoMex/Jalisco
-            return ('C1', 'Inseguros-urbanos',    '#3498db',
+            return ('C1', 'Inseguros-urbanos',    '#3891c7',
                 'CDMX, EdoMex, Jalisco. Tienen acceso digital pero la PEOR percepción de seguridad (solo ~16% se siente seguro). '
                 'El alto crimen reportado refleja MEJOR sistema de denuncias, no necesariamente más crimen real. '
                 'La digitalización financiera aquí correlaciona negativamente con la confianza institucional.')
