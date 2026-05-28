@@ -70,10 +70,10 @@ layout = html.Div([
 
             # Insight cards — primary insight first, then supporting
             dbc.Row([
-                dbc.Col(_ins('◈', 'card-danger', 'Patrimonio lidera la incidencia nacional',
-                    'Los delitos contra el patrimonio (robo, fraude) representan más del 50 % '
-                    'del total de la incidencia delictiva nacional — y el fraude es el subtipo '
-                    'que más crece con la digitalización.', 'animate-in-delay-1'), md=4),
+                dbc.Col(_ins('◈', 'card-danger', '20+ millones de delitos en 10 años',
+                    'Entre 2015 y 2024 México acumuló más de 20 millones de delitos en fuero común. '
+                    'El pico fue 2018 — desde entonces la tendencia es de estabilización, '
+                    'pero la composición del crimen sigue cambiando.', 'animate-in-delay-1'), md=4),
                 dbc.Col(_ins('◎', 'card-gold', 'Pico histórico 2018',
                     f'La incidencia alcanzó su máximo en {kpis_ini["anio_pico"]} con '
                     f'{kpis_ini["total"]:,.0f} delitos; desde entonces la tendencia es mixta.', 'animate-in-delay-2'), md=4),

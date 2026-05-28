@@ -70,12 +70,18 @@ layout = html.Div([
                     'Robo, fraude y extorsión representan la mayoría de los delitos. '
                     'El fraude es el subtipo más correlacionado con la brecha digital '
                     '— la digitalización crea nuevas superficies de ataque.',
-                    'animate-in-delay-1'), md=6),
-                dbc.Col(_ins('◎', 'card-gold', 'Sociedad y Vida: volumen vs impacto',
-                    'Narcomenudeo y trata crecen como proporción del total. '
-                    'Homicidio pesa menos del 10 % pero domina la percepción ciudadana. '
-                    'La composición es estable: varía menos del 5 % año a año.',
-                    'animate-in-delay-2'), md=6),
+                    'animate-in-delay-1'), md=4),
+                dbc.Col(_ins('⬡', 'card-danger', 'Fraude: la señal digital — r = +0.63',
+                    'De todos los tipos de delito, el fraude es el más correlacionado con '
+                    'el índice de desarrollo digital (r=+0.63). Más banca electrónica = '
+                    'más transacciones expuestas = más vectores de ataque. '
+                    'No es casualidad — es estructura.',
+                    'animate-in-delay-2'), md=4),
+                dbc.Col(_ins('⌬', 'card-gold', 'Digitalización transforma el crimen',
+                    'La digitalización no crea más homicidios — transforma el crimen '
+                    'de físico a digital. La solución no es frenar la inversión digital: '
+                    'es construir la capa de ciberseguridad que la hace sostenible.',
+                    'animate-in-delay-3'), md=4),
             ], className='g-3 mb-3'),
 
             # Filter bar

@@ -123,3 +123,16 @@ def get_sustained_investment_data():
                .agg(n=('estado', 'count'), avg_wage=('avg_wage', 'mean'))
                .reset_index())
     return summary
+
+
+def get_economia_r2():
+    """Compute R² for e-banking → wages regression (same as fig_digital_wages_scatter)."""
+    df = get_digital_wages_scatter()
+    x_col = 'empresas_que_utilizan_banca_electronica_por'
+    if df.empty or x_col not in df.columns or 'avg_wage' not in df.columns:
+        return 0.594
+    valid = df[[x_col, 'avg_wage']].dropna()
+    if len(valid) < 5:
+        return 0.594
+    _, _, r, _, _ = stats.linregress(valid[x_col].values, valid['avg_wage'].values)
+    return r ** 2

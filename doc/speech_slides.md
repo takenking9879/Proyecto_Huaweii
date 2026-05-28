@@ -29,6 +29,13 @@ El dashboard tiene **8 slides en 3 actos**. Tiempo estimado de presentación: 20
 - Heatmap mes × año (los meses cálidos se iluminan)
 - Ranking top 5 estados por tasa delictiva
 
+**Metodología y cálculo:**
+- Datos: SESNSP incidencia_estatal.parquet 2015–2024, una fila por (estado, año, mes, subtipo_delito).
+- Tendencia anual: suma total de incidencia_delictiva por año a nivel nacional.
+- Estacionalidad: suma por (año, mes) → promedio del total mensual entre años.
+- Tasa per cápita: total anual por estado / población CONAPO (estimaciones de punto medio, interpoladas linealmente entre 2015, 2020, 2025) × 100,000.
+- No hay experimento formal — es estadística descriptiva sobre el universo de delitos registrados.
+
 **Llamada a la acción:**
 "Sabemos cuándo y cuánto. Ahora veamos exactamente dónde."
 
@@ -48,6 +55,12 @@ El dashboard tiene **8 slides en 3 actos**. Tiempo estimado de presentación: 20
 - Ranking horizontal de 32 estados coloreado por tasa
 - Top 15 municipios con mayor incidencia
 
+**Metodología y cálculo:**
+- Datos: misma fuente SESNSP, agregada por estado y municipio.
+- Ranking: suma histórica 2015–2024 de incidencia_delictiva por entidad federativa, ordenada descendente.
+- Top 15 municipios: suma histórica por clave_municipio, top N por total.
+- Observación Yucatán/NL: comparación descriptiva entre trayectoria de incidencia y el IDDE promedio 2022–2025 de esos estados. Correlación observacional, no experimento formal.
+
 **Llamada a la acción:**
 "La concentración hace que la inversión focalizada rinda más. Antes de decidir dónde, necesitamos entender qué tipo de crimen estamos atacando."
 
@@ -66,6 +79,12 @@ El dashboard tiene **8 slides en 3 actos**. Tiempo estimado de presentación: 20
 **Mostrar en pantalla:**
 - Gráfica de dona con las 7 categorías jurídicas (Patrimonio domina)
 - Treemap de subtipos: Patrimonio expandido, Fraude resaltado
+
+**Metodología y cálculo:**
+- Datos: SESNSP clasificado por bien_jurídico_afectado (7 categorías del Código Penal) usando la tabla dim_bien_juridico y bien_map.parquet.
+- Gráfica de dona: proporción de cada categoría sobre el total nacional 2015–2024.
+- r=+0.63 fraude-IDDE: correlación de Pearson entre tasa de fraude por estado (SESNSP 2025, por 100k hab.) e IDDE 2025 (N=31 estados). Sobrevive corrección Benjamini-Hochberg (FDR=0.05). Ver: `technical_defense.md §4.2` (EXP-26) y `§15.3`.
+- Nota: la correlación positiva se debe en parte a la cifra negra (estados más digitalizados denuncian más); sin embargo, el fraude es la única categoría donde el mecanismo es genuino (más transacciones digitales = más fraude). Ver: `technical_defense.md §11`.
 
 **Llamada a la acción:**
 "Ya entendemos el diagnóstico: hay patrón, hay geografía, hay composición. Ahora la pregunta que importa: ¿puede la infraestructura digital cambiar esto? Pasemos a la evidencia."
@@ -97,6 +116,12 @@ El dashboard tiene **8 slides en 3 actos**. Tiempo estimado de presentación: 20
 **Lo que NO hay que decir** *(pero sí tienes que saber si te preguntan):*
 "Esto no es causalidad probada. Con 4 años de datos de panel no podemos hacer inferencia causal perfecta. Es la asociación más fuerte que encontramos — y es robusta a múltiples pruebas estadísticas."
 
+**Metodología y cálculo:**
+- R²=0.445 IDDE→percepción: regresión OLS simple, X=IDDE 2025 (compuesto), Y=% que se siente seguro (ENVIPE 2023, por estado), N=32 estados. EXP-09. Ver: `technical_defense.md §10`.
+- r=+0.78 confianza social: correlación Pearson entre pilar de infraestructura del IDDE y % que confía en amigos (ENVIPE), N=31. Sobrevive BH. Ver: `technical_defense.md §4.2`.
+- Cadena de mediación (mecanismo): infraestructura → confianza amigos r=+0.747 (p<0.0001) → % seguro r=+0.424 (p=0.017). Efecto directo infraestructura→seguridad: r=+0.235, p=0.20 (no significativo). Mediación completa a través de lazos sociales. Controlando por salario: r=+0.708 (persiste). Ver: `technical_defense.md §15.1`.
+- Limitación: asociación robusta pero no causal. Con 4 años de panel y N=32, no se puede descartar un confundidor no observado. Ver: `technical_defense.md §1.2`.
+
 **Llamada a la acción:**
 "La percepción de seguridad es el indicador político más importante para un gobernador. La infraestructura digital la mejora más que cualquier otra intervención que hayamos medido. ¿Tiene también retorno económico? Veamos."
 
@@ -121,6 +146,12 @@ El dashboard tiene **8 slides en 3 actos**. Tiempo estimado de presentación: 20
 **Llamada a la acción:**
 "Dos conclusiones: (1) inviertan hoy porque el retorno llega en 2 años — tiempo suficiente para medir resultados antes del siguiente ciclo, y (2) no aflojen — la consistencia de la inversión importa más que su magnitud inicial."
 
+**Metodología y cálculo:**
+- R²=0.594 banca digital→salarios: regresión OLS simple, X=% empresas con banca electrónica (IDDE 2025), Y=salario promedio mensual (ENOE 2025), N=32 estados. EXP-15. IC bootstrap 95% (EXP-24): R²=0.426 [0.197, 0.671]. El IC no cruza cero — la relación es estadísticamente robusta. Ver: `technical_defense.md §5.2` y `§4.3`.
+- Análisis de rezago (0.247/0.310/0.372): EXP-02. Se regresiona el salario de 2025 sobre el IDDE de ese año (lag-0), del año anterior (lag-1), y de hace 2 años (lag-2). El R² máximo está en lag-2. Ver: `technical_defense.md §1` (tabla de estrategias).
+- +$790/mes inversión sostenida: EXP-18. Diferencia de medias entre estados con crecimiento IDDE 3 años consecutivos (n=3) vs estados inconsistentes (n=28). ⚠ Actualización bootstrap (EXP-24): IC 95% cruza cero — diferencia no estadísticamente significativa al 95% con este tamaño de grupos. Estimación puntual actualizada: $1,256. Usar con cautela en el pitch. Ver: `technical_defense.md §5.1`.
+- Centros de datos: EXP-07. Salario mediano por quintil de densidad de centros de datos por estado.
+
 ---
 
 ### Slide 06 — Ciberseguridad: La Brecha que Crece
@@ -142,6 +173,13 @@ El dashboard tiene **8 slides en 3 actos**. Tiempo estimado de presentación: 20
 
 **Lo que NO hay que decir** *(pero sí tienes que saber si te preguntan):*
 "La mayoría de correlaciones positivas entre IDDE y delitos se explican por el efecto de cifra negra: los estados más digitalizados tienen mejores sistemas de denuncia, por lo que registran más crimen per cápita aunque el crimen real sea similar. El fraude es la única excepción donde el mecanismo es genuino (más transacciones digitales = más fraude). Los datos de fraude incluyen fraude tradicional y cibernético — no podemos separarlos con los registros actuales del SESNSP."
+
+**Metodología y cálculo:**
+- 8 estados en brecha crítica: EXP-01. Cuadrante: eje X = exposición digital (% banca electrónica), eje Y = capacidad de ciberseguridad (subpilar ciberseguridad del IDDE). "Crítico" = por encima de la mediana en exposición Y por debajo de la mediana en capacidad. Los umbrales son la mediana (arbitrarios). Ver: `technical_defense.md §8.1` (EXP-01).
+- Fraude r=+0.63: mismo cálculo que Slide 03. Mecanismo genuino (no solo cifra negra). Ver: `technical_defense.md §15.3`.
+- Homicidio r=+0.009, Secuestro r=−0.071: Pearson, ambos p>0.70, N=31. No significativos. Ver: `technical_defense.md §15.3`.
+- Heterogeneidad por tipo: correlaciones Pearson entre IDDE 2025 y tasa de cada tipo de delito por estado. Corrección BH aplicada (EXP-26). Ver: `technical_defense.md §4.2` y `§15.3`.
+- Nota sobre cifra negra: la mayoría de correlaciones positivas IDDE-crimen son artefacto del subreporte. El fraude es la excepción. Ver: `technical_defense.md §3` y `§11`.
 
 **Llamada a la acción:**
 "La digitalización no crea más homicidios ni secuestros — esos los resuelven otras políticas de seguridad. Pero sí crea fraude. Y ese sí se puede resolver con la segunda capa de infraestructura: ciberseguridad. La pregunta no es si construir la carretera — ya es obligatorio. La pregunta es si van a poner semáforos."
@@ -175,6 +213,13 @@ El dashboard tiene **8 slides en 3 actos**. Tiempo estimado de presentación: 20
 **Lo que NO hay que decir** *(pero sí tienes que saber si te preguntan):*
 "Las proyecciones de ROI son extrapolaciones lineales basadas en el corte transversal de 2025. Los perfiles son descriptivos, no prescriptivos — identifican patrones, no garantizan resultados."
 
+**Metodología y cálculo:**
+- K-Means k=4: clustering sobre los 32 estados usando IDDE 2025 (compuesto) y tasas de criminalidad. EXP-17. Validado con análisis de silhouette y 10 inicializaciones aleatorias (k=4 fue el k óptimo). Ver: `technical_defense.md §2.1`.
+- IDDE→salarios R²≈0.29: regresión OLS simple usando el IDDE compuesto (no solo banca electrónica) vs salario promedio mensual (ENOE 2025), N=32, lag-0. EXP-02. Distinto al R²=0.594 de Slide 05 porque el predictor es diferente (índice global vs subcomponente de banca).
+- r=+0.78 IDDE→confianza: mismo cálculo que Slide 04. Ver: `technical_defense.md §4.2`.
+- ROI +10 pts IDDE: extrapolación lineal usando la pendiente de regresión IDDE→[salario, confianza, percepción] × Δ10 puntos. Es descriptivo (identifica el potencial del corte transversal), no predictivo. Las proyecciones son lineales y asumen que la relación se sostiene fuera del rango observado.
+- Limitación: los perfiles son descriptivos, no prescriptivos. Los retornos son extrapolaciones lineales sobre un corte transversal — no están probados como efectos causales. Ver: `technical_defense.md §9`.
+
 **Llamada a la acción:**
 "Ustedes ya saben en qué perfil está su estado. La pregunta no es si deben invertir — los datos lo responden. La pregunta es qué tipo de inversión y en qué orden. Veamos el diagnóstico específico de su estado."
 
@@ -195,6 +240,15 @@ El dashboard tiene **8 slides en 3 actos**. Tiempo estimado de presentación: 20
 - 4 KPIs (IDDE actual, posición nacional, brecha a C2, ganancia proyectada)
 - Radar chart con 6 dimensiones: estado vs cluster vs media nacional
 - Ranking nacional con el estado seleccionado resaltado
+
+**Metodología y cálculo:**
+- Valores calculados en tiempo real al seleccionar el estado.
+- IDDE del estado: valor del índice compuesto IDDE 2025 para el estado seleccionado.
+- Posición nacional: rank ordinal del estado entre los 32 por valor de IDDE.
+- Brecha a C2: diferencia entre el IDDE promedio del cluster C2 (estados avanzados) y el IDDE del estado seleccionado.
+- Ganancia proyectada: brecha_a_C2 × pendiente de regresión IDDE→salario (misma que Slide 07).
+- Radar 6 dimensiones: valores normalizados (0–1) del estado, de su cluster, y de la media nacional en: IDDE compuesto, velocidad de descarga móvil, usuarios de internet, salario promedio mensual, % percepción segura, confianza social promedio.
+- Los mismos modelos que Slide 07. Ver limitaciones generales en: `technical_defense.md §9`.
 
 **Llamada a la acción:**
 "Este es su diagnóstico ejecutivo. El siguiente paso es convertir este diagnóstico en un plan de inversión con fases, KPIs y cronograma. Eso es exactamente lo que podemos construir juntos."

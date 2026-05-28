@@ -2,6 +2,9 @@ import dash
 from dash import dcc, html
 import dash_bootstrap_components as dbc
 from pages.components import sidebar
+from pages.get_data.get_data_economia import get_economia_r2
+
+_r2 = get_economia_r2()
 
 dash.register_page(__name__, path='/slide_economia')
 
@@ -40,13 +43,13 @@ layout = html.Div([
             html.Div(className='page-accent-line'),
             html.H1('Economía Digital · El Retorno Medible', className='page-title'),
             html.P(
-                'La adopción de servicios digitales predice salarios con R²=0.594 — '
+                f'La adopción de servicios digitales predice salarios con R²={_r2:.3f} — '
                 'los estados más digitalizados pagan sueldos un 10% más altos, '
                 'y el retorno de la inversión se materializa con un rezago de 2 años',
                 className='page-subtitle',
             ),
             html.Div([
-                html.Span('R² = 0.594 banca digital → salarios', className='badge-green me-2'),
+                html.Span(f'R² = {_r2:.3f} banca digital → salarios', className='badge-green me-2'),
                 html.Span('+$790/mes inversión sostenida', className='badge-cyan me-2'),
                 html.Span('Lag 2 años para ROI máximo', className='badge-gold'),
             ]),
@@ -57,8 +60,8 @@ layout = html.Div([
         html.Div([
 
             html.P(
-                'Dos canales económicos medibles: (1) la adopción de banca electrónica y '
-                'pagos digitales predice con R²=0.594 los salarios promedios estatales — '
+                f'Dos canales económicos medibles: (1) la adopción de banca electrónica y '
+                f'pagos digitales predice con R²={_r2:.3f} los salarios promedios estatales — '
                 'el canal más fuerte del análisis. (2) La densidad de centros de datos '
                 'correlaciona positivamente con salarios medianos. '
                 'La inversión en infraestructura digital no paga el mismo año: '
@@ -68,8 +71,8 @@ layout = html.Div([
 
             # Insight cards
             dbc.Row([
-                dbc.Col(_ins('◈', 'card-success', 'R² = 0.594 — señal económica más fuerte',
-                    'La proporción de empresas con banca electrónica explica el 59% '
+                dbc.Col(_ins('◈', 'card-success', f'R² = {_r2:.3f} — señal económica más fuerte',
+                    f'La proporción de empresas con banca electrónica explica el {_r2*100:.0f}% '
                     'de la varianza en salarios estatales. Es la correlación económica '
                     'más robusta del análisis, superando conectividad y cobertura.',
                     'animate-in-delay-1'), md=3),
@@ -107,7 +110,7 @@ layout = html.Div([
                     _chart_card(
                         'Banca electrónica vs salario promedio estatal',
                         'seco-wages-scatter',
-                        desc='R²=0.594 — la relación más fuerte entre digitalización y retorno económico en el análisis.',
+                        desc=f'R²={_r2:.3f} — la relación más fuerte entre digitalización y retorno económico en el análisis.',
                         height='380px',
                     ),
                     md=12,

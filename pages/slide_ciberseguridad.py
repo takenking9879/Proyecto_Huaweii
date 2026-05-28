@@ -173,7 +173,7 @@ layout = html.Div([
                     _chart_card(
                         'Correlación IDDE × tipo de crimen (r de Pearson, 32 estados)',
                         'sciber-crime-types',
-                        desc='Verde = correlación negativa (crimen baja con IDDE). Rojo = positiva. ● = p<0.05. La mayoría sube por mejor registro; solo homicidio y secuestro son estadísticamente planos.',
+                        desc='Rojo = fraude (r=+0.63). Gris = homicidio/secuestro (inmunes al IDDE). Cian = otros delitos. ● = p<0.05.',
                         height='340px',
                     ),
                     md=12,

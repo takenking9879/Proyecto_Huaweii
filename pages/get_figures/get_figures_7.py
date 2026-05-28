@@ -333,7 +333,7 @@ def fig_infra_vs_trust(highlight_state=None):
         **_BASE,
         xaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.04)',
                    color=C_MUTED,
-                   title=dict(text='Índice IDDE 2024', font=dict(size=11))),
+                   title=dict(text='IDDE 2025', font=dict(size=11))),
         yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.04)',
                    color=C_MUTED,
                    title=dict(text='Confianza en amigos (score 1–4)', font=dict(size=11))),

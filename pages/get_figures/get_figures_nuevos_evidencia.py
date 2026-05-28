@@ -96,7 +96,16 @@ def fig_crime_type_heterogeneity():
 
     df = pd.DataFrame(results).sort_values('r')
 
-    colors = [C_GREEN if r < 0 else C_RED for r in df['r']]
+    # Color by crime type: fraude=red, homicidio/secuestro=gray(muted), others=cyan
+    _C_RED_CRIME   = '#cf0a2c'
+    _C_MUTED_CRIME = '#5c5c74'
+    _C_CYAN_CRIME  = '#00b4cc'
+    _CRIME_COLORS = {
+        'Fraude':    _C_RED_CRIME,
+        'Homicidio': _C_MUTED_CRIME,
+        'Secuestro': _C_MUTED_CRIME,
+    }
+    colors = [_CRIME_COLORS.get(name, _C_CYAN_CRIME) for name in df['name']]
     sig_markers = ['●' if p < 0.05 else '○' for p in df['p']]
 
     fig = go.Figure()
@@ -117,15 +126,15 @@ def fig_crime_type_heterogeneity():
     # Zero line
     fig.add_vline(x=0, line=dict(color=C_GRAY, width=1, dash='dot'))
 
-    # Significance bands
-    fig.add_vrect(x0=-0.35, x1=-0.20, fillcolor=C_GREEN, opacity=0.06,
-                  line_width=0, annotation_text='Crimen ↓ con IDDE',
+    # Significance bands — shading only, no color-coded annotation
+    fig.add_vrect(x0=-0.35, x1=-0.20, fillcolor='rgba(92,92,116,0.10)',
+                  line_width=0, annotation_text='r negativo',
                   annotation_position='top left',
-                  annotation_font_size=9, annotation_font_color=C_GREEN)
-    fig.add_vrect(x0=0.20, x1=0.65, fillcolor=C_RED, opacity=0.06,
-                  line_width=0, annotation_text='Crimen ↑ con IDDE',
+                  annotation_font_size=9, annotation_font_color=_C_MUTED_CRIME)
+    fig.add_vrect(x0=0.20, x1=0.65, fillcolor='rgba(207,10,44,0.06)',
+                  line_width=0, annotation_text='r positivo fuerte',
                   annotation_position='top right',
-                  annotation_font_size=9, annotation_font_color=C_RED)
+                  annotation_font_size=9, annotation_font_color=_C_RED_CRIME)
 
     fig.update_layout(
         **_BASE,

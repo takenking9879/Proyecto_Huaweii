@@ -97,7 +97,8 @@ def get_estacionalidad(estado=None, anio_inicio=None, anio_fin=None):
     MESES = {1:'Jan',2:'Feb',3:'Mar',4:'Apr',5:'May',6:'Jun',
              7:'Jul',8:'Aug',9:'Sep',10:'Oct',11:'Nov',12:'Dec'}
     df = _filtrar(estado, anio_inicio, anio_fin)
-    res = df.groupby('mes_num')['incidencia_delictiva'].mean().reset_index()
+    monthly = df.groupby(['anio', 'mes_num'])['incidencia_delictiva'].sum().reset_index()
+    res = monthly.groupby('mes_num')['incidencia_delictiva'].mean().reset_index()
     res['mes'] = res['mes_num'].map(MESES)
     return res.sort_values('mes_num')
 

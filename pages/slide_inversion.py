@@ -97,7 +97,7 @@ layout = html.Div([
             html.Div([
                 html.Span('32 estados analizados', className='badge-gray me-2'),
                 html.Span('4 perfiles de inversión', className='badge-cyan me-2'),
-                html.Span('R²=0.77 modelo predictivo', className='badge-green me-2'),
+                html.Span('r = +0.78 IDDE → confianza social', className='badge-cyan me-2'),
                 html.Span('IDDE → salario r²=0.29', className='badge-gold'),
             ]),
         ], className='page-header'),
@@ -163,7 +163,13 @@ layout = html.Div([
                     _chart_card('IDDE 2025 × Salario promedio mensual', 'sinv-wage-scatter',
                                 desc='Cada punto = un estado. R²≈0.29 — los estados más digitalizados pagan salarios más altos.',
                                 height='340px'),
-                    md=12,
+                    md=6,
+                ),
+                dbc.Col(
+                    _chart_card('IDDE 2025 × Confianza social', 'sinv-trust-scatter',
+                                desc='r = +0.78 — la correlación más fuerte del análisis. Conectividad fortalece el tejido social.',
+                                height='340px'),
+                    md=6,
                 ),
             ], className='g-3 mb-3'),
 
@@ -194,17 +200,20 @@ layout = html.Div([
 
 
 @dash.callback(
-    Output('sinv-roi-bars',    'figure'),
+    Output('sinv-roi-bars',     'figure'),
     Output('sinv-wage-scatter', 'figure'),
-    Output('sinv-idde-bars',   'figure'),
+    Output('sinv-trust-scatter','figure'),
+    Output('sinv-idde-bars',    'figure'),
     Input('sinv-init', 'n_intervals'),
 )
 def load_charts(_):
     from pages.get_figures.get_figures_inversion import (
-        fig_roi_projections, fig_idde_vs_wage_scatter, fig_cluster_idde_bars,
+        fig_roi_projections, fig_idde_vs_wage_scatter,
+        fig_idde_vs_trust_scatter, fig_cluster_idde_bars,
     )
     return (
         _safe(fig_roi_projections),
         _safe(fig_idde_vs_wage_scatter),
+        _safe(fig_idde_vs_trust_scatter),
         _safe(fig_cluster_idde_bars),
     )

@@ -74,9 +74,10 @@ layout = html.Div([
                 dbc.Col(_ins('⬡', 'card-cyan', 'Norte vs Sur',
                     'Estados del norte (Baja California, Chihuahua) tienen tasas per cápita '
                     'muy superiores a la media; el sureste reporta las tasas más bajas.', 'animate-in-delay-3'), md=3),
-                dbc.Col(_ins('⌬', 'card-success', 'Guanajuato en alza',
-                    'Guanajuato muestra el aumento más sostenido desde 2018, '
-                    'pasando de posición media a estar entre los 5 estados más afectados.', 'animate-in-delay-4'), md=3),
+                dbc.Col(_ins('⌬', 'card-success', 'Infraestructura digital explica trayectorias',
+                    'Estados como Yucatán y Nuevo León — con IDDE consistentemente por encima '
+                    'de la media nacional — muestran las trayectorias de incidencia más favorables. '
+                    'La inversión digital no es casualidad.', 'animate-in-delay-4'), md=3),
             ], className='g-3 mb-3'),
 
             # Filter bar
