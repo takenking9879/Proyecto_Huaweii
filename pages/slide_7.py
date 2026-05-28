@@ -6,6 +6,7 @@ from pages.get_figures.get_figures_7 import (
     fig_idde_vs_percepcion,
     fig_percepcion_inseguridad,
     fig_infra_vs_trust,
+    fig_percepcion_vs_incidencia,
 )
 from pages.get_data.get_data_7 import get_kpis
 from pages.get_data.get_data_1 import get_entidades
@@ -163,6 +164,30 @@ layout = html.Div([
                 ),
             ], className='g-3 mb-4'),
 
+            # Perception gap chart
+            html.Div([
+                html.Div(className='section-accent-cyan'),
+                html.H3('Brecha de percepción — la percepción no siempre refleja el crimen real',
+                        className='section-block-title'),
+                html.P(
+                    'Cada punto es un estado. Eje X = tasa real de crimen. Eje Y = % que se siente inseguro. '
+                    'Los estados sobre la línea tienen más percepción de inseguridad de la que predice el crimen real. '
+                    'El color indica IDDE: rojo = bajo IDDE (mayor brecha), verde = alto IDDE (percepción más alineada).',
+                    className='section-block-subtitle'),
+            ], className='section-block-header'),
+
+            dbc.Row([
+                dbc.Col(
+                    _chart_card(
+                        'Crimen real vs % que se siente inseguro · 32 estados',
+                        's7-graph-percepcion-gap2',
+                        desc='Sobre la línea = percepción peor que el crimen real. Bajo la línea = percepción mejor. Color: rojo = bajo IDDE, verde = alto IDDE.',
+                        height='400px',
+                    ),
+                    md=12,
+                ),
+            ], className='g-3 mb-4'),
+
         ], className='main-scroll'),
 
     ], className='section-profundo',
@@ -175,6 +200,7 @@ layout = html.Div([
     Output('s7-graph-percepcion-gap', 'figure'),
     Output('s7-graph-percepcion',     'figure'),
     Output('s7-graph-infra-trust',    'figure'),
+    Output('s7-graph-percepcion-gap2', 'figure'),
     Input('s7-dd-estado', 'value'),
 )
 def update_charts(estado):
@@ -183,4 +209,5 @@ def update_charts(estado):
         fig_idde_vs_percepcion(highlight),
         fig_percepcion_inseguridad(highlight),
         fig_infra_vs_trust(highlight),
+        fig_percepcion_vs_incidencia(highlight),
     )

@@ -339,3 +339,118 @@ def fig_infra_vs_trust(highlight_state=None):
                    title=dict(text='Confianza en amigos (score 1–4)', font=dict(size=11))),
     )
     return fig
+
+
+def fig_percepcion_vs_incidencia(highlight=None):
+    """
+    Scatter: actual crime rate (X) vs % feeling insecure (Y).
+    States above the regression line have higher perceived insecurity than crime reality predicts.
+    This shows the 'perception gap' — infrastructure investment closes it.
+    """
+    try:
+        from pages.get_data.get_data_11 import get_data_11
+    except ImportError:
+        return go.Figure()
+
+    d = get_data_11()
+    cross = d['cross_cl'].copy()
+
+    x_col = 'crime_rate_100k'
+    safe_col = 'percepcion_segura'
+    idde_col = 'indice_de_desarrollo_digital_estatal_2025'
+
+    if x_col not in cross.columns or safe_col not in cross.columns:
+        return go.Figure()
+
+    sub = cross[['estado', x_col, safe_col, idde_col]].dropna().copy()
+    sub['pct_inseguro'] = (1 - sub[safe_col]) * 100
+    sub['idde'] = sub[idde_col]
+
+    x = sub[x_col].values
+    y = sub['pct_inseguro'].values
+
+    slope, intercept, r, p, _ = stats.linregress(x, y)
+    xi = np.linspace(x.min(), x.max(), 100)
+    band_y = slope * xi + intercept
+
+    # Residuals: positive = higher perception than predicted (above line)
+    sub['resid'] = y - (slope * x + intercept)
+
+    # Color by IDDE (normalize 0-1)
+    idde_vals = sub['idde'].values
+    idde_norm = (idde_vals - idde_vals.min()) / (idde_vals.max() - idde_vals.min() + 1e-9)
+    # Low IDDE = red (high perception gap), high IDDE = green (perception aligned or better)
+    colors = [
+        f'rgba({int(207*(1-v)+0*v)},{int(10*(1-v)+184*v)},{int(44*(1-v)+122*v)},0.85)'
+        for v in idde_norm
+    ]
+
+    # Highlight color
+    if highlight:
+        colors = [
+            'white' if e == highlight else c
+            for e, c in zip(sub['estado'], colors)
+        ]
+        sizes = [12 if e == highlight else 8 for e in sub['estado']]
+    else:
+        sizes = [8] * len(sub)
+
+    fig = go.Figure()
+
+    # Regression band
+    fig.add_trace(go.Scatter(
+        x=np.concatenate([xi, xi[::-1]]),
+        y=np.concatenate([band_y + 5, (band_y - 5)[::-1]]),
+        fill='toself', fillcolor='rgba(92,92,116,0.10)',
+        line=dict(width=0), showlegend=False, hoverinfo='skip',
+    ))
+
+    # Regression line
+    fig.add_trace(go.Scatter(
+        x=xi, y=band_y, mode='lines',
+        line=dict(color='#5c5c74', width=1.5, dash='dash'),
+        name='Tendencia', hoverinfo='skip',
+    ))
+
+    # State points
+    fig.add_trace(go.Scatter(
+        x=sub[x_col], y=sub['pct_inseguro'],
+        mode='markers+text',
+        text=[e[:8] for e in sub['estado']],
+        textposition='top center',
+        textfont=dict(size=7, color='rgba(184,184,204,0.65)'),
+        marker=dict(color=colors, size=sizes, opacity=0.88,
+                    line=dict(color='#1a1a24', width=1.2)),
+        hovertemplate=(
+            '<b>%{text}</b><br>'
+            'Crimen real: %{x:.0f} / 100k<br>'
+            '% inseguro: %{y:.1f}%<extra></extra>'
+        ),
+        showlegend=False,
+    ))
+
+    # Annotations for region labels
+    fig.add_annotation(
+        xref='paper', yref='paper', x=0.02, y=0.97,
+        text='⬆ Sobre la línea: más percepción que crimen real<br>⬇ Bajo la línea: percepción mejor que su crimen',
+        showarrow=False, align='left',
+        bgcolor='rgba(92,92,116,0.15)', bordercolor='#5c5c74', borderwidth=1,
+        font=dict(size=9, color='#b8b8cc'),
+    )
+
+    fig.update_layout(
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(family='DM Sans, sans-serif', color='#e8e8f0', size=12),
+        margin=dict(l=60, r=20, t=20, b=60),
+        xaxis=dict(
+            title=dict(text='Tasa de crimen real (por 100k hab.)', font=dict(size=11)),
+            showgrid=True, gridcolor='rgba(255,255,255,0.05)', color='#5c5c74',
+        ),
+        yaxis=dict(
+            title=dict(text='% que se siente inseguro', font=dict(size=11)),
+            showgrid=True, gridcolor='rgba(255,255,255,0.05)', color='#5c5c74',
+        ),
+        hoverlabel=dict(bgcolor='#0f0f18', font_color='#e8e8f0'),
+    )
+    return fig

@@ -54,7 +54,7 @@ def fig_digital_wages_scatter():
     if df.empty:
         return go.Figure()
 
-    x_col = 'empresas_que_utilizan_banca_electronica_por'
+    x_col = 'digital_exposure'
     if x_col not in df.columns:
         return go.Figure()
 
@@ -100,7 +100,7 @@ def fig_digital_wages_scatter():
                     line=dict(color=C_PAPER, width=1.2)),
         hovertemplate=(
             '<b>%{text}</b><br>'
-            'Empresas con banca digital: %{x:.1f}%<br>'
+            'Adopción digital: %{x:.3f}<br>'
             'Salario promedio: $%{y:,.0f}<extra></extra>'
         ),
         showlegend=False,
@@ -119,7 +119,7 @@ def fig_digital_wages_scatter():
         **_BASE,
         margin=dict(l=70, r=30, t=20, b=60),
         xaxis=dict(
-            title=dict(text='% empresas con banca electrónica', font=dict(size=11)),
+            title=dict(text='Adopción digital (banca + tarjeta débito, normalizado)', font=dict(size=11)),
             showgrid=True, gridcolor='rgba(255,255,255,0.04)', color=C_MUTED,
         ),
         yaxis=dict(

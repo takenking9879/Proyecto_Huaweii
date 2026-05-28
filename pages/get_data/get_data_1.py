@@ -134,3 +134,22 @@ def get_top_estados_percapita(n=5):
     anual['tasa'] = anual['incidencia_delictiva'] / anual['poblacion'] * 100_000
     top = anual.groupby('estado')['tasa'].mean().nlargest(n).index.tolist()
     return anual[anual['estado'].isin(top)], top
+
+
+_df_tipos = None
+
+
+def get_tendencia_tipos():
+    """Annual Fraude and Robo totals for composition chart (Slide 1)."""
+    global _df_tipos
+    if _df_tipos is not None:
+        return _df_tipos
+    _df_tipos = query("""
+        SELECT f.anio,
+               SUM(CASE WHEN s.subtipo = 'Fraude' THEN f.incidencia_delictiva ELSE 0 END) AS fraude,
+               SUM(CASE WHEN s.subtipo ILIKE '%robo%' THEN f.incidencia_delictiva ELSE 0 END) AS robo
+        FROM incidencia_estatal f
+        JOIN dim_subtipo_delito s ON f.subtipo_id = s.subtipo_id
+        GROUP BY f.anio ORDER BY f.anio
+    """)
+    return _df_tipos

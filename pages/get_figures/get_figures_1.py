@@ -91,3 +91,45 @@ def fig_top_estados_lineas():
                       x=0, y=1),
     )
     return fig
+
+
+# ── 4. Tendencia por tipo: Fraude vs Robo (composición) ─────────
+def fig_tendencia_tipos():
+    from pages.get_data.get_data_1 import get_tendencia_tipos
+    df = get_tendencia_tipos()
+    if df.empty:
+        return go.Figure()
+
+    # Index to 2015=100 so both lines visible despite magnitude difference
+    base_f = df[df['anio'] == df['anio'].min()]['fraude'].values[0]
+    base_r = df[df['anio'] == df['anio'].min()]['robo'].values[0]
+    df = df.copy()
+    df['fraude_idx'] = df['fraude'] / base_f * 100
+    df['robo_idx']   = df['robo']   / base_r * 100
+
+    fig = go.Figure()
+    fig.add_hline(y=100, line=dict(color=C_MUTED, width=1, dash='dot'))
+    fig.add_trace(go.Scatter(
+        x=df['anio'], y=df['fraude_idx'], name='Fraude',
+        mode='lines+markers',
+        line=dict(color=C_RED, width=2.5),
+        marker=dict(color=C_RED, size=7, line=dict(color=C_PAPER, width=2)),
+        hovertemplate='<b>Fraude</b> %{x}: índice %{y:.0f} (2015=100)<extra></extra>',
+    ))
+    fig.add_trace(go.Scatter(
+        x=df['anio'], y=df['robo_idx'], name='Robo total',
+        mode='lines+markers',
+        line=dict(color=C_CYAN, width=2.5),
+        marker=dict(color=C_CYAN, size=7, line=dict(color=C_PAPER, width=2)),
+        hovertemplate='<b>Robo</b> %{x}: índice %{y:.0f} (2015=100)<extra></extra>',
+    ))
+    fig.update_layout(
+        **_BASE,
+        xaxis=dict(showgrid=False, color=C_MUTED, tickformat='d', dtick=1),
+        yaxis=dict(
+            showgrid=True, gridcolor='rgba(255,255,255,0.04)', color=C_MUTED,
+            title=dict(text='Índice 2015=100', font=dict(size=11, color=C_MUTED)),
+        ),
+        legend=dict(font=dict(size=10), bgcolor='rgba(0,0,0,0)', x=0.02, y=0.97),
+    )
+    return fig

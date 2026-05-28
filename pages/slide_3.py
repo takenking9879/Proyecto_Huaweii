@@ -127,6 +127,30 @@ layout = html.Div([
                 ),
             ], className='g-3 mb-3'),
 
+            # Fraude-IDDE scatter
+            html.Div([
+                html.Div(className='section-accent-cyan'),
+                html.H3('Fraude × IDDE 2025 — la señal digital (r = +0.63)',
+                        className='section-block-title'),
+                html.P(
+                    'Cada punto es un estado. A mayor infraestructura digital, más fraude por habitante. '
+                    'No porque la tecnología cause fraude — sino porque más banca electrónica = más '
+                    'transacciones expuestas = más vectores de ataque. Es estructura, no casualidad.',
+                    className='section-block-subtitle'),
+            ], className='section-block-header'),
+
+            dcc.Interval(id='s3-fraude-init', interval=600, max_intervals=1),
+
+            dbc.Row([
+                dbc.Col(
+                    _card('Tasa de fraude vs IDDE · 32 estados',
+                          dcc.Loading(dcc.Graph(id='s3-graph-fraude-idde',
+                                                config=_CFG, style={'height': '360px'})),
+                          desc='r = +0.63: el fraude es el único delito con correlación genuina al nivel digital. Homicidio y secuestro: r≈0 (inmunes al IDDE).'),
+                    md=12,
+                ),
+            ], className='g-3 mb-3'),
+
         ], className='main-scroll'),
 
     ], className='section-exploratorio', style={'flex': '1', 'display': 'flex', 'flexDirection': 'column', 'overflow': 'hidden'}),
@@ -146,3 +170,18 @@ def actualizar(estado, inicio, fin):
         fig_donut_bienes(estado, inicio, fin),
         fig_treemap_subtipos(estado, inicio, fin),
     )
+
+
+@dash.callback(
+    Output('s3-graph-fraude-idde', 'figure'),
+    Input('s3-fraude-init', 'n_intervals'),
+)
+def load_fraude_scatter(_):
+    from pages.get_figures.get_figures_nuevos_evidencia import fig_fraude_idde_scatter
+    try:
+        return fig_fraude_idde_scatter()
+    except Exception:
+        import traceback
+        traceback.print_exc()
+        import plotly.graph_objects as go
+        return go.Figure()

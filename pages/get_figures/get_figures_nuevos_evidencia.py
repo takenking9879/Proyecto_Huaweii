@@ -438,3 +438,100 @@ def fig_municipal_permutation():
     )
 
     return fig
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# FIGURE 5: Fraude vs IDDE Scatter
+# Shows the r=+0.63 correlation between fraud rate and digital development
+# across Mexico's 32 states — the key signal for Slide 3.
+# ═══════════════════════════════════════════════════════════════════════
+
+def fig_fraude_idde_scatter():
+    """
+    Scatter: IDDE 2025 vs fraude rate per 100k habitants — r=+0.63.
+    Used in Slide 3 to show that fraud specifically correlates with digital development.
+    """
+    cross = _get_cross()
+    idde_col = 'indice_de_desarrollo_digital_estatal_2025'
+    y_col = 'fraude_rate_100k'
+
+    if idde_col not in cross.columns or y_col not in cross.columns:
+        return go.Figure()
+
+    sub = cross[['estado', idde_col, y_col, 'cluster_label', 'cluster_color']].dropna()
+    if len(sub) < 10:
+        return go.Figure()
+
+    x = sub[idde_col].values
+    y = sub[y_col].values
+    labels = sub['estado'].values
+    colors = sub['cluster_color'].values if 'cluster_color' in sub.columns else [C_CYAN] * len(sub)
+
+    slope, intercept, r, p, _ = stats.linregress(x, y)
+    r2 = r ** 2
+    xi = np.linspace(x.min(), x.max(), 100)
+
+    _C_PAPER = '#1a1a24'
+    _C_TEXT  = '#e8e8f0'
+    _C_MUTED = '#5c5c74'
+
+    fig = go.Figure()
+
+    # Regression band
+    band_y = slope * xi + intercept
+    fig.add_trace(go.Scatter(
+        x=np.concatenate([xi, xi[::-1]]),
+        y=np.concatenate([band_y + band_y.std() * 0.3, (band_y - band_y.std() * 0.3)[::-1]]),
+        fill='toself', fillcolor='rgba(207,10,44,0.07)',
+        line=dict(width=0), showlegend=False, hoverinfo='skip',
+    ))
+
+    # Regression line
+    fig.add_trace(go.Scatter(
+        x=xi, y=band_y, mode='lines',
+        line=dict(color=C_RED, width=1.8, dash='dash'),
+        name=f'r = +{r:.2f}', hoverinfo='skip',
+    ))
+
+    # State points
+    fig.add_trace(go.Scatter(
+        x=x, y=y, mode='markers+text',
+        text=[e[:8] for e in labels],
+        textposition='top center',
+        textfont=dict(size=7, color='rgba(184,184,204,0.70)'),
+        marker=dict(color=colors if len(colors) == len(sub) else [C_CYAN] * len(sub),
+                    size=9, opacity=0.85,
+                    line=dict(color=_C_PAPER, width=1.2)),
+        hovertemplate=(
+            '<b>%{text}</b><br>'
+            'IDDE: %{x:.1f}<br>'
+            'Fraude: %{y:.1f} por 100k hab.<extra></extra>'
+        ),
+        showlegend=False,
+    ))
+
+    # r annotation
+    fig.add_annotation(
+        xref='paper', yref='paper', x=0.02, y=0.97,
+        text=f'<b>r = +{r:.2f}</b>  (R²={r2:.3f})<br>Fraude es el único delito con<br>correlación genuina al IDDE',
+        showarrow=False, align='left',
+        bgcolor='rgba(207,10,44,0.12)', bordercolor=C_RED, borderwidth=1,
+        font=dict(size=10, color=_C_TEXT),
+    )
+
+    fig.update_layout(
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(family='Inter, sans-serif', size=11, color=_C_TEXT),
+        margin=dict(l=55, r=20, t=25, b=55),
+        xaxis=dict(
+            title=dict(text='IDDE 2025', font=dict(size=11)),
+            showgrid=True, gridcolor='rgba(255,255,255,0.05)', color=_C_MUTED,
+        ),
+        yaxis=dict(
+            title=dict(text='Tasa de fraude (por 100k hab.)', font=dict(size=11)),
+            showgrid=True, gridcolor='rgba(255,255,255,0.05)', color=_C_MUTED,
+        ),
+        showlegend=False,
+    )
+    return fig

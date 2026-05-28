@@ -1,6 +1,7 @@
 import dash
 from dash import dcc, html, Input, Output
 import dash_bootstrap_components as dbc
+import plotly.graph_objects as go
 from pages.get_figures.get_figures_2 import fig_ranking_estados, fig_top_municipios
 from pages.get_data.get_data_2 import get_anios
 from pages.components import sidebar
@@ -117,6 +118,30 @@ layout = html.Div([
                 ),
             ], className='g-3 mb-3'),
 
+            # IDDE vs crime section
+            html.Div([
+                html.Div(className='section-accent-cyan'),
+                html.H3('Infraestructura digital vs tasa de crimen — 32 estados',
+                        className='section-block-title'),
+                html.P(
+                    'Los estados con mayor IDDE tienden a mostrar trayectorias de crimen más favorables. '
+                    'Yucatán y Nuevo León (◆) tienen IDDE consistentemente por encima de la media nacional '
+                    'y están debajo de la línea de tendencia — menos crimen del que predice su tamaño.',
+                    className='section-block-subtitle'),
+            ], className='section-block-header'),
+
+            dcc.Interval(id='s2-idde-init', interval=600, max_intervals=1),
+
+            dbc.Row([
+                dbc.Col(
+                    _card('IDDE 2025 × tasa de crimen · 32 estados',
+                          dcc.Loading(dcc.Graph(id='s2-graph-idde-crime',
+                                                config=_CFG, style={'height': '380px'})),
+                          desc='◆ Verde = Yucatán y NL (alto IDDE, bajo crimen). Estados bajo la línea: mejor resultado que lo esperado por su digitalización.'),
+                    md=12,
+                ),
+            ], className='g-3 mb-3'),
+
         ], className='main-scroll'),
 
     ], className='section-exploratorio', style={'flex': '1', 'display': 'flex', 'flexDirection': 'column', 'overflow': 'hidden'}),
@@ -133,3 +158,17 @@ layout = html.Div([
 def actualizar(anio, top_n):
     a = anio if anio else None
     return fig_ranking_estados(a), fig_top_municipios(a, n=top_n or 15)
+
+
+@dash.callback(
+    Output('s2-graph-idde-crime', 'figure'),
+    Input('s2-idde-init', 'n_intervals'),
+)
+def load_idde_crime(_):
+    from pages.get_figures.get_figures_2 import fig_idde_crime_scatter
+    try:
+        return fig_idde_crime_scatter()
+    except Exception:
+        import traceback
+        traceback.print_exc()
+        return go.Figure()

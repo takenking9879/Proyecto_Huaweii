@@ -28,6 +28,7 @@ El dashboard tiene **8 slides en 3 actos**. Tiempo estimado de presentación: 20
 - Línea de tendencia anual 2015–2024 con el pico en 2018
 - Heatmap mes × año (los meses cálidos se iluminan)
 - Ranking top 5 estados por tasa delictiva
+- **[NUEVO]** Gráfica de composición fraude vs robo (índice 2015=100): fraude +91%, robo −17%
 
 **Metodología y cálculo:**
 - Datos: SESNSP incidencia_estatal.parquet 2015–2024, una fila por (estado, año, mes, subtipo_delito).
@@ -54,6 +55,7 @@ El dashboard tiene **8 slides en 3 actos**. Tiempo estimado de presentación: 20
 **Mostrar en pantalla:**
 - Ranking horizontal de 32 estados coloreado por tasa
 - Top 15 municipios con mayor incidencia
+- **[NUEVO]** Scatter IDDE 2025 × tasa de crimen (Yucatán y NL resaltados en verde como referencia)
 
 **Metodología y cálculo:**
 - Datos: misma fuente SESNSP, agregada por estado y municipio.
@@ -79,6 +81,7 @@ El dashboard tiene **8 slides en 3 actos**. Tiempo estimado de presentación: 20
 **Mostrar en pantalla:**
 - Gráfica de dona con las 7 categorías jurídicas (Patrimonio domina)
 - Treemap de subtipos: Patrimonio expandido, Fraude resaltado
+- **[NUEVO]** Scatter tasa de fraude × IDDE 2025 (r=+0.63, regresión visible, 32 estados)
 
 **Metodología y cálculo:**
 - Datos: SESNSP clasificado por bien_jurídico_afectado (7 categorías del Código Penal) usando la tabla dim_bien_juridico y bien_map.parquet.
@@ -112,6 +115,7 @@ El dashboard tiene **8 slides en 3 actos**. Tiempo estimado de presentación: 20
 - Scatter IDDE vs % que se siente seguro (R²=0.445 visible)
 - Barras de percepción de inseguridad por estado (los 32 estados)
 - Scatter IDDE vs confianza social (r=+0.78 en friends)
+- **[NUEVO]** Scatter crimen real × % inseguro (estados sobre la línea = percepción peor que incidencia; color por IDDE)
 
 **Lo que NO hay que decir** *(pero sí tienes que saber si te preguntan):*
 "Esto no es causalidad probada. Con 4 años de datos de panel no podemos hacer inferencia causal perfecta. Es la asociación más fuerte que encontramos — y es robusta a múltiples pruebas estadísticas."
@@ -133,13 +137,13 @@ El dashboard tiene **8 slides en 3 actos**. Tiempo estimado de presentación: 20
 "Los estados más digitalizados pagan salarios más altos. Eso ya lo sabíamos. Lo que no sabíamos con precisión era cuánto, cuándo y qué tipo de inversión digital paga más."
 
 **Tesis que debes transmitir:**
-- R²=0.594: la adopción de banca electrónica predice el 59% de la varianza en salarios estatales. No es el índice general — es específicamente la digitalización de la economía lo que mueve el salario.
+- R²≈0.539: la adopción de servicios financieros digitales (banca electrónica + tarjeta de débito, índice compuesto) predice el 54% de la varianza en salarios estatales. No es el índice general — es específicamente la digitalización de la economía lo que mueve el salario.
 - El retorno no es inmediato. El índice digital de hace 2 años predice mejor los salarios de hoy que el del mismo año. El mensaje para un gobernador es directo: **inviertan hoy, el retorno llega justo antes del siguiente ciclo político.**
 - Los estados con inversión digital constante (sin interrupciones) tienen salarios consistentemente más altos — la consistencia importa más que la magnitud.
 - Los estados en el quintil más alto de centros de datos tienen salarios $1,192/mes más altos que los del quintil inferior.
 
 **Mostrar en pantalla:**
-- Scatter banca electrónica vs salario promedio mensual (R²=0.594, 32 estados)
+- Scatter adopción digital (banca + tarjeta débito, normalizado) vs salario promedio mensual (R²≈0.539, 32 estados)
 - Barras: poder predictivo del IDDE lag-0 vs lag-1 vs lag-2 (el lag-2 gana)
 - Comparativo inversión sostenida vs inconsistente (+$790/mes)
 
@@ -147,7 +151,7 @@ El dashboard tiene **8 slides en 3 actos**. Tiempo estimado de presentación: 20
 "Dos conclusiones: (1) inviertan hoy porque el retorno llega en 2 años — tiempo suficiente para medir resultados antes del siguiente ciclo, y (2) no aflojen — la consistencia de la inversión importa más que su magnitud inicial."
 
 **Metodología y cálculo:**
-- R²=0.594 banca digital→salarios: regresión OLS simple, X=% empresas con banca electrónica (IDDE 2025), Y=salario promedio mensual (ENOE 2025), N=32 estados. EXP-15. IC bootstrap 95% (EXP-24): R²=0.426 [0.197, 0.671]. El IC no cruza cero — la relación es estadísticamente robusta. Ver: `technical_defense.md §5.2` y `§4.3`.
+- R²≈0.539 adopción digital compuesta→salarios: regresión OLS, X=índice compuesto (banca electrónica + tarjeta débito, normalizados y promediados), Y=salario promedio mensual (ENOE 2025), N=31 estados. Derivado de EXP-15. Nota: EXP-15 original con variable compuesta de mayor alcance da R²=0.594; la diferencia (0.539 vs 0.594) refleja la versión simplificada de 2 variables disponibles en el pipeline actual. IC bootstrap 95% para banca sola (EXP-24): R²=0.426 [0.197, 0.671]. Ver: `technical_defense.md §5.2` y `§4.3`.
 - Análisis de rezago (0.247/0.310/0.372): EXP-02. Se regresiona el salario de 2025 sobre el IDDE de ese año (lag-0), del año anterior (lag-1), y de hace 2 años (lag-2). El R² máximo está en lag-2. Ver: `technical_defense.md §1` (tabla de estrategias).
 - +$790/mes inversión sostenida: EXP-18. Diferencia de medias entre estados con crecimiento IDDE 3 años consecutivos (n=3) vs estados inconsistentes (n=28). ⚠ Actualización bootstrap (EXP-24): IC 95% cruza cero — diferencia no estadísticamente significativa al 95% con este tamaño de grupos. Estimación puntual actualizada: $1,256. Usar con cautela en el pitch. Ver: `technical_defense.md §5.1`.
 - Centros de datos: EXP-07. Salario mediano por quintil de densidad de centros de datos por estado.

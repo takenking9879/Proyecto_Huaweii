@@ -96,3 +96,113 @@ def fig_evolucion_estados():
                       x=0, y=1),
     )
     return fig
+
+
+def fig_idde_crime_scatter():
+    """
+    Scatter: IDDE 2025 vs total crime rate per 100k — 32 states.
+    Highlights Yucatán and Nuevo León as low-crime + high-IDDE reference states.
+    Used in Slide 2 to show the IDDE-crime trajectory connection.
+    """
+    try:
+        from pages.get_data.get_data_11 import get_data_11
+        import numpy as np
+        from scipy import stats
+    except ImportError:
+        return go.Figure()
+
+    d = get_data_11()
+    cross = d['cross_cl'].copy()
+    idde_col = 'indice_de_desarrollo_digital_estatal_2025'
+    y_col = 'crime_rate_100k'
+
+    if idde_col not in cross.columns or y_col not in cross.columns:
+        return go.Figure()
+
+    sub = cross[['estado', idde_col, y_col]].dropna()
+
+    C_PAPER = '#1a1a24'
+    C_TEXT  = '#e8e8f0'
+    C_MUTED = '#5c5c74'
+    C_CYAN  = '#00b4cc'
+    C_RED   = '#cf0a2c'
+    C_GOLD  = '#c9922a'
+    C_GREEN = '#00b87a'
+
+    HIGHLIGHT = {'Yucatán', 'Nuevo León'}
+
+    x = sub[idde_col].values
+    y = sub[y_col].values
+    slope, intercept, r, p, _ = stats.linregress(x, y)
+    xi = np.linspace(x.min(), x.max(), 100)
+
+    fig = go.Figure()
+
+    # Regression band
+    band_y = slope * xi + intercept
+    fig.add_trace(go.Scatter(
+        x=np.concatenate([xi, xi[::-1]]),
+        y=np.concatenate([band_y * 1.15, (band_y * 0.85)[::-1]]),
+        fill='toself', fillcolor='rgba(0,180,204,0.05)',
+        line=dict(width=0), showlegend=False, hoverinfo='skip',
+    ))
+
+    # Regression line
+    fig.add_trace(go.Scatter(
+        x=xi, y=band_y, mode='lines',
+        line=dict(color=C_CYAN, width=1.5, dash='dash'),
+        name=f'r = {r:+.2f}', hoverinfo='skip',
+    ))
+
+    # All non-highlighted states
+    normal = sub[~sub['estado'].isin(HIGHLIGHT)]
+    fig.add_trace(go.Scatter(
+        x=normal[idde_col], y=normal[y_col],
+        mode='markers',
+        marker=dict(color=C_CYAN, size=8, opacity=0.55,
+                    line=dict(color=C_PAPER, width=1)),
+        text=normal['estado'],
+        hovertemplate='<b>%{text}</b><br>IDDE: %{x:.1f}<br>Crimen: %{y:.0f} por 100k<extra></extra>',
+        showlegend=False,
+    ))
+
+    # Highlighted states (Yucatan, NL)
+    hl = sub[sub['estado'].isin(HIGHLIGHT)]
+    fig.add_trace(go.Scatter(
+        x=hl[idde_col], y=hl[y_col],
+        mode='markers+text',
+        marker=dict(color=C_GREEN, size=14, opacity=1.0,
+                    symbol='diamond',
+                    line=dict(color='white', width=1.5)),
+        text=hl['estado'],
+        textposition='top center',
+        textfont=dict(size=10, color=C_GREEN),
+        hovertemplate='<b>%{text}</b><br>IDDE: %{x:.1f}<br>Crimen: %{y:.0f} por 100k<extra></extra>',
+        showlegend=False,
+    ))
+
+    # Annotation for highlighted states
+    fig.add_annotation(
+        xref='paper', yref='paper', x=0.98, y=0.97,
+        text='◆ Yucatán y NL: IDDE alto<br>+ trayectoria favorable',
+        showarrow=False, align='right',
+        bgcolor='rgba(0,184,122,0.12)', bordercolor=C_GREEN, borderwidth=1,
+        font=dict(size=10, color=C_TEXT),
+    )
+
+    fig.update_layout(
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(family='DM Sans, sans-serif', color=C_TEXT, size=12),
+        margin=dict(l=65, r=20, t=20, b=60),
+        xaxis=dict(
+            title=dict(text='IDDE 2025', font=dict(size=11)),
+            showgrid=True, gridcolor='rgba(255,255,255,0.05)', color=C_MUTED,
+        ),
+        yaxis=dict(
+            title=dict(text='Crimen por 100k hab.', font=dict(size=11)),
+            showgrid=True, gridcolor='rgba(255,255,255,0.05)', color=C_MUTED,
+        ),
+        hoverlabel=dict(bgcolor='#0f0f18', font_color=C_TEXT),
+    )
+    return fig

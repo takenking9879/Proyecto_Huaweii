@@ -1,7 +1,7 @@
 import dash
 from dash import dcc, html, Input, Output
 import dash_bootstrap_components as dbc
-from pages.get_figures.get_figures_1 import fig_tendencia, fig_estacionalidad, fig_top_estados_lineas
+from pages.get_figures.get_figures_1 import fig_tendencia, fig_estacionalidad, fig_top_estados_lineas, fig_tendencia_tipos
 from pages.get_figures.get_figures_4 import fig_heatmap
 from pages.get_data.get_data_1 import get_entidades, get_anios, get_kpis
 from pages.components import sidebar
@@ -144,6 +144,28 @@ layout = html.Div([
                           dcc.Graph(id='s1-graph-heatmap', figure=fig_heatmap(),
                                     config=_CFG, style={'height': '360px'}),
                           desc='Más rojo = más delitos. Lee por filas (mismo mes en distintos años) para ver si el patrón estacional se mantiene, o por columnas para ver tendencia anual.'),
+                    md=12,
+                ),
+            ], className='g-3 mb-3'),
+
+            # Composición: fraude crece, robo cae
+            html.Div([
+                html.Div(className='section-accent-cyan'),
+                html.H3('Composición en movimiento: fraude sube, robo baja',
+                        className='section-block-title'),
+                html.P(
+                    'Índice 2015=100. El fraude ha crecido +91% — el robo físico cayó 17% desde su pico en 2018. '
+                    'La digitalización transforma el tipo de crimen: de físico a digital.',
+                    className='section-block-subtitle'),
+            ], className='section-block-header'),
+
+            dbc.Row([
+                dbc.Col(
+                    _card('Fraude (↑+91%) vs Robo total (↓−17%) — índice 2015=100',
+                          dcc.Graph(id='s1-graph-tendencia-tipos',
+                                    figure=fig_tendencia_tipos(),
+                                    config=_CFG, style={'height': '300px'}),
+                          desc='Fraude (rojo) crece consistentemente; robo (cian) peaked en 2018 y declina. La digitalización no reduce el crimen — lo transforma.'),
                     md=12,
                 ),
             ], className='g-3 mb-3'),
