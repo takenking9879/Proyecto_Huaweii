@@ -106,9 +106,9 @@ El dashboard tiene **8 slides en 3 actos**. Tiempo estimado de presentación: 20
 "Siete de cada diez mexicanos se sienten inseguros. Pero hay algo que los datos revelan que pocas personas conocen: la infraestructura digital explica el 44% de por qué un ciudadano se siente seguro o inseguro — independientemente del crimen real en su estado."
 
 **Tesis que debes transmitir:**
-- R²=0.445: el índice digital explica el 44% de la varianza en percepción de seguridad. Es la asociación más fuerte que encontramos entre cualquier inversión pública y el bienestar ciudadano.
-- El mecanismo no es directo. La infraestructura digital no hace que la gente se sienta más segura por arte de magia — lo hace a través de los lazos sociales: más conectividad → más confianza entre vecinos y amigos (r=+0.75) → y esa confianza social es lo que predice sentirse seguro (r=+0.42). El camino es: red → comunidad → seguridad percibida.
-- Este efecto es robusto: se mantiene después de controlar por el nivel económico del estado.
+- R²=0.588: el índice digital explica el 59% de la varianza en confianza social. Es la asociación más fuerte del análisis entre cualquier inversión pública y el tejido comunitario.
+- El efecto sobre percepción de seguridad no es directo — la relación directa IDDE→percepción es débil (r=+0.25, p=0.18). El mecanismo opera a través de los lazos sociales: más conectividad → más confianza entre amigos y vecinos (r=+0.77) → y esa confianza social es lo que predice sentirse seguro (r=+0.45, R²=0.200). El camino es: red → comunidad → seguridad percibida.
+- Este efecto mediado es robusto: se mantiene después de controlar por el nivel económico del estado.
 - Hay estados con alta percepción de inseguridad que no encabezan la incidencia real — la brecha de percepción se cierra con mejor infraestructura.
 
 **Mostrar en pantalla:**
@@ -121,7 +121,8 @@ El dashboard tiene **8 slides en 3 actos**. Tiempo estimado de presentación: 20
 "Esto no es causalidad probada. Con 4 años de datos de panel no podemos hacer inferencia causal perfecta. Es la asociación más fuerte que encontramos — y es robusta a múltiples pruebas estadísticas."
 
 **Metodología y cálculo:**
-- R²=0.445 IDDE→percepción: regresión OLS simple, X=IDDE 2025 (compuesto), Y=% que se siente seguro (ENVIPE 2023, por estado), N=32 estados. EXP-09. Ver: `technical_defense.md §10`.
+- R²=0.588 IDDE→confianza social: correlación Pearson entre IDDE 2025 (compuesto) y conf_amigos (ENVIPE, media estatal), N=31. El hallazgo más fuerte del análisis. Ver: `technical_defense.md §4.2`.
+- Relación directa IDDE→percepción: r=+0.25, R²=0.062, p=0.18 (N=31) — no significativa. La R²=0.445 reportada en EXP-09 no es reproducible con los datos actuales del pipeline. El efecto opera principalmente vía mediación. Ver: `technical_defense.md §10` y `§15.1`.
 - r=+0.78 confianza social: correlación Pearson entre pilar de infraestructura del IDDE y % que confía en amigos (ENVIPE), N=31. Sobrevive BH. Ver: `technical_defense.md §4.2`.
 - Cadena de mediación (mecanismo): infraestructura → confianza amigos r=+0.747 (p<0.0001) → % seguro r=+0.424 (p=0.017). Efecto directo infraestructura→seguridad: r=+0.235, p=0.20 (no significativo). Mediación completa a través de lazos sociales. Controlando por salario: r=+0.708 (persiste). Ver: `technical_defense.md §15.1`.
 - Limitación: asociación robusta pero no causal. Con 4 años de panel y N=32, no se puede descartar un confundidor no observado. Ver: `technical_defense.md §1.2`.

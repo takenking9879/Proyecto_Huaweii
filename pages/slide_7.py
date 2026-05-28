@@ -49,15 +49,15 @@ layout = html.Div([
             html.Div(className='page-accent-line'),
             html.H1('Percepción e Infraestructura · Brecha de Confianza', className='page-title'),
             html.P(
-                'La infraestructura digital explica el 44% de la varianza en percepción de seguridad '
-                '(R²=0.445) — los ciudadanos en estados más digitalizados se sienten más seguros, '
-                'independientemente de la tasa de crimen real',
+                'La infraestructura digital explica el 59% de la varianza en confianza social '
+                '(R²=0.588) — y la confianza social predice la percepción de seguridad (R²=0.200). '
+                'El camino es indirecto pero robusto: red → comunidad → seguridad percibida.',
                 className='page-subtitle',
             ),
             html.Div([
-                html.Span(f'R² = 0.445 IDDE → percepción', className='badge-cyan me-2'),
+                html.Span('R² = 0.588 IDDE → confianza social', className='badge-cyan me-2'),
                 html.Span(f'{kpis["pct_inseguro_nac"]:.1f}% se sienten inseguros', className='badge-red me-2'),
-                html.Span(f'Confianza social r = +0.78', className='badge-gold'),
+                html.Span('Confianza social r = +0.78', className='badge-gold'),
             ]),
         ], className='page-header'),
 
@@ -72,10 +72,10 @@ layout = html.Div([
             ),
 
             dbc.Row([
-                dbc.Col(_ins('◈', 'card-cyan', 'R² = 0.445 — relación más fuerte',
-                    'La infraestructura digital explica el 44% de por qué los ciudadanos '
-                    'se sienten seguros o inseguros — independientemente del crimen real. '
-                    'Es el vínculo más sólido entre inversión y percepción ciudadana.',
+                dbc.Col(_ins('◈', 'card-cyan', 'R² = 0.588 IDDE → confianza social',
+                    'La infraestructura digital explica el 59% de la varianza en confianza social. '
+                    'Es el vínculo más sólido del análisis — y la confianza social '
+                    'es lo que a su vez predice la percepción de seguridad (R²=0.200).',
                     'animate-in-delay-1'), md=3),
                 dbc.Col(_ins('◎', 'card-danger', f'{kpis["pct_inseguro_nac"]:.1f}% — 7 de cada 10',
                     f'Más de 7 de cada 10 mexicanos se siente inseguro. '
@@ -110,12 +110,13 @@ layout = html.Div([
             # MAIN: IDDE vs percepcion (full width)
             html.Div([
                 html.Div(className='section-accent-cyan'),
-                html.H3('Infraestructura digital → percepción de seguridad (R² = 0.445)',
+                html.H3('Infraestructura digital → percepción de seguridad (vía confianza social)',
                         className='section-block-title'),
                 html.P(
                     'Cada punto es un estado. Los estados sobre la línea de tendencia '
                     'obtienen más percepción de seguridad de lo que su IDDE predice (verde). '
-                    'Los que están por debajo están sub-rindiendo — su potencial de mejora es mayor (rojo).',
+                    'Los que están por debajo están sub-rindiendo — su potencial de mejora es mayor (rojo). '
+                    'La relación directa IDDE→percepción es débil (r=+0.25); el efecto opera a través de la confianza social.',
                     className='section-block-subtitle'),
             ], className='section-block-header'),
 
@@ -124,7 +125,7 @@ layout = html.Div([
                     _chart_card(
                         'IDDE 2025 vs % que se siente seguro',
                         's7-graph-percepcion-gap',
-                        desc='R²=0.445: la infraestructura digital explica el 44% de la varianza en percepción de seguridad.',
+                        desc='Relación directa r=+0.25 (débil). El efecto principal es mediado: IDDE → confianza social (R²=0.588) → percepción (R²=0.200).',
                         height='400px',
                     ),
                     md=12,
