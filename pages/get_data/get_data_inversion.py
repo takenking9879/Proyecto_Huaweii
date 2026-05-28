@@ -156,8 +156,8 @@ def get_state_investment_table():
     rows = []
     for _, row in cross_cl.iterrows():
         idde_val = float(row[_IDDE_COL]) if _IDDE_COL in cross_cl.columns else 0.0
-        gap = max(0.0, c2_idde_mean - idde_val)
         code = row.get('cluster_code', 'C0')
+        gap = 0.0 if code == 'C2' else max(0.0, c2_idde_mean - idde_val)
         slope_wage = roi.get(code, {}).get('slope_wage', 0)
         projected_wage_gain = round(gap * slope_wage, 0)
 
@@ -195,10 +195,10 @@ def get_state_profile(estado):
     nat_rank = int(cross_cl[_IDDE_COL].rank(ascending=False).loc[row.name]) if _IDDE_COL in cross_cl.columns else 16
     idde_val = float(row[_IDDE_COL]) if _IDDE_COL in cross_cl.columns else 0.0
 
-    # C2 target gap
+    # C2 target gap — C2 states already at target level
     c2_rows = cross_cl[cross_cl['cluster_code'] == 'C2']
     c2_idde = float(c2_rows[_IDDE_COL].mean()) if len(c2_rows) > 0 else 60.0
-    gap = max(0.0, c2_idde - idde_val)
+    gap = 0.0 if code == 'C2' else max(0.0, c2_idde - idde_val)
 
     roi = get_roi_projections()
     slope_wage = roi.get(code, {}).get('slope_wage', 0)

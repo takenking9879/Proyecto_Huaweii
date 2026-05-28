@@ -114,18 +114,29 @@ def _build_profile_layout(estado):
         dbc.Col(dbc.Card([
             dbc.CardBody([
                 html.P('Brecha al nivel C2', className='insight-title'),
-                html.H2(f'+{profile["gap_to_c2"]:.1f} pts',
-                        style={'color': '#c9922a', 'fontWeight': '800', 'margin': '4px 0'}),
-                html.P('para alcanzar perfil Desarrollado', className='insight-desc'),
+                html.H2(
+                    '✓ Desarrollado' if code == 'C2' else f'+{profile["gap_to_c2"]:.1f} pts',
+                    style={'color': '#00b87a' if code == 'C2' else '#c9922a',
+                           'fontWeight': '800', 'margin': '4px 0'},
+                ),
+                html.P(
+                    'Ya en perfil Desarrollado' if code == 'C2' else 'para alcanzar perfil Desarrollado',
+                    className='insight-desc',
+                ),
             ], style={'padding': '14px 16px', 'textAlign': 'center'}),
         ], className='card-clean animate-in h-100 card-gold animate-in-delay-2'), md=3),
 
         dbc.Col(dbc.Card([
             dbc.CardBody([
                 html.P('Ganancia salarial proyectada', className='insight-title'),
-                html.H2(f'${profile["projected_wage_gain"]:,.0f}',
-                        style={'color': '#00b87a', 'fontWeight': '800', 'margin': '4px 0'}),
-                html.P('si cierra brecha a C2', className='insight-desc'),
+                html.H2(
+                    '—' if code == 'C2' else f'${profile["projected_wage_gain"]:,.0f}',
+                    style={'color': '#00b87a', 'fontWeight': '800', 'margin': '4px 0'},
+                ),
+                html.P(
+                    'ya en nivel de referencia' if code == 'C2' else 'si cierra brecha a C2',
+                    className='insight-desc',
+                ),
             ], style={'padding': '14px 16px', 'textAlign': 'center'}),
         ], className='card-clean animate-in h-100 card-success animate-in-delay-3'), md=3),
     ], className='g-3 mb-3')
@@ -173,12 +184,23 @@ def _build_profile_layout(estado):
               'background': '#16161f'})
 
     # Insight sentence
+    if code == 'C2':
+        _insight_text = (
+            f'{estado} ya pertenece al perfil Desarrollado-seguro (C2). '
+            f'IDDE actual: {profile["idde"]:.1f} pts — posición #{profile["national_rank"]} nacional. '
+            f'Mantener la inversión para consolidar el liderazgo digital.'
+        )
+    else:
+        _insight_text = (
+            f'Aumentar {profile["gap_to_c2"]:.1f} pts de IDDE proyecta '
+            f'${profile["projected_wage_gain"]:,.0f}/mes de ganancia salarial '
+            f'y fortalecería la confianza social al nivel del cluster C2.'
+        )
+
     insight = html.Div([
         html.Span('◈ ', style={'color': color, 'fontWeight': '700'}),
         html.Span(
-            f'Aumentar {profile["gap_to_c2"]:.1f} pts de IDDE proyecta '
-            f'${profile["projected_wage_gain"]:,.0f}/mes de ganancia salarial '
-            f'y fortalecería la confianza social al nivel del cluster C2.',
+            _insight_text,
             style={'fontSize': '12px', 'color': '#c8c8d8', 'lineHeight': '1.6'},
         ),
     ], style={
